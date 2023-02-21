@@ -1,0 +1,17 @@
+CREATE DATABASE users;
+
+USE users;
+
+CREATE TABLE Users (
+id VARCHAR(255) PRIMARY KEY,
+username VARCHAR(30) NOT NULL,
+password VARCHAR(30) NOT NULL,
+email VARCHAR(50) NOT NULL
+);
+
+INSERT INTO Users (id, username, password, email)
+VALUES 
+('1bb53018-b1dc-11ed-875c-45eb8b791582', 'miki', '123', 'miki@gmail.com'),
+('6a54a320-b1dc-11ed-875c-45eb8b791582', 'marko', '123', 'marko@gmail.com'),
+('7247bc7a-b1dc-11ed-875c-45eb8b791582', 'nikola', '123', 'nikola@gmail.com'),
+('7bd3a8e4-b1dc-11ed-875c-45eb8b791582', 'vanja', '123', 'vanja@gmail.com');
