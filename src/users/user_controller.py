@@ -2,6 +2,7 @@ import os, uuid, json
 from flask import Flask, request
 from flask_mysqldb import MySQL
 from user_service import UserService
+from user_model import User
 
 server = Flask(__name__)
 
@@ -16,7 +17,7 @@ service = UserService(mysql)
 
 @server.route("/read-users", methods=["GET"])
 def read_users():
-    users = service.read_all()
+    users: list[User] = service.read_all()
     return json.dumps(users)
 
 
@@ -24,26 +25,16 @@ def read_users():
 def read_user():
     sent_user = request.json
     user_id = sent_user["id"]
-    user = service.read_user(user_id)
+    user: User = service.read_user(user_id)
     return json.dumps(user)
 
 
 @server.route("/create-user", methods=["POST"])
 def create_user():
-    user = request.json
-    username = user["username"]
-    password = user["password"]
-    email = user["email"]
-    user_type = user["userType"]
-
-    cur = mysql.connection.cursor()
-    cur.execute(
-        f"INSERT INTO Users(id, username, password, email, user_type) VALUES \
-        ('{str(uuid.uuid1())}', '{username}', '{password}', '{email}', '{user_type}');"
-    )
-    mysql.connection.commit()
-    cur.close()
-    return json.dumps(user)
+    user_json = request.json
+    read_user: User = user_json
+    created_user: User = service.create_user(read_user)
+    return created_user
 
 
 @server.route("/update-user", methods=["PUT"])

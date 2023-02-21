@@ -6,6 +6,7 @@ class User(object):
         self.username: str = username
         self.password: str = password
         self.email: str = email
+        # TODO: change from str to UserType
         self.user_type: str = user_type
 
 
