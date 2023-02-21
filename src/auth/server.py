@@ -1,5 +1,6 @@
 import jwt, datetime, os
 from flask import Flask, request
+
 server = Flask(__name__)
 import mysql.connector
 
@@ -11,14 +12,13 @@ server.config["MYSQL_DB"] = os.environ.get("MYSQL_DB")
 server.config["MYSQL_PORT"] = os.environ.get("MYSQL_PORT")
 
 # create a connection to the MySQL server
-cnx = mysql.connector.connect(user='username', password='password',
-                              host='localhost')
+cnx = mysql.connector.connect(user="username", password="password", host="localhost")
 
 # create a cursor object to execute SQL queries
 cursor = cnx.cursor()
 
 # define the SQL query to create a new database
-DB_NAME = 'new_database'
+DB_NAME = "new_database"
 create_database_query = f"CREATE DATABASE {DB_NAME}"
 
 # execute the query to create the new database
@@ -29,7 +29,6 @@ cursor.close()
 cnx.close()
 
 print("Database created successfully!")
-
 
 
 @server.route("/login", methods=["POST"])
@@ -55,6 +54,7 @@ def login():
     else:
         return "invalid cerdentials", 401
 
+
 @server.route("/validate", method=["POST"])
 def validate():
     encoded_jwt = request.headers["Autharization"]
@@ -69,16 +69,20 @@ def validate():
         return "not authorized", 403
     return decoded, 200
 
+
 def createJWT(username, secret, authz):
     return jwt.encode(
-        {"username": username,
-         "exp": datetime.datetime.now(tz=datetime.timezone.utc) + datetime.timedelta(days=1),
-         "iat": datetime.datetime.utcnow(),
-         "admin": authz,
+        {
+            "username": username,
+            "exp": datetime.datetime.now(tz=datetime.timezone.utc)
+            + datetime.timedelta(days=1),
+            "iat": datetime.datetime.utcnow(),
+            "admin": authz,
         },
         secret,
         algorithm="HS256",
     )
+
 
 if __name__ == "__main__":
     server.run(host="0.0.0.0", port=5000)
