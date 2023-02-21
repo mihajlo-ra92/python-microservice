@@ -12,17 +12,28 @@ server.config["MYSQL_DB"] = os.environ.get("MYSQL_DB")
 mysql = MySQL(server)
 
 
-@server.route("/users", methods=["GET"])
-def get_users():
+@server.route("/read-users", methods=["GET"])
+def read_users():
     cur = mysql.connection.cursor()
-    _ = cur.execute(f"SELECT * FROM Users")
-    user_details = cur.fetchall()
+    cur.execute(f"SELECT * FROM Users")
+    users = cur.fetchall()
     cur.close()
-    return json.dumps(user_details)
+    return json.dumps(users)
 
 
-@server.route("/add-user", methods=["POST"])
-def add_user():
+@server.route("/read-user", methods=["GET"])
+def read_user():
+    sent_user = request.json
+    user_id = sent_user["id"]
+    cur = mysql.connection.cursor()
+    cur.execute(f"SELECT * FROM Users WHERE id='{user_id}';")
+    read_user = cur.fetchall()
+    cur.close()
+    return json.dumps(read_user)
+
+
+@server.route("/create-user", methods=["POST"])
+def create_user():
     user = request.json
     username = user["username"]
     password = user["password"]
@@ -36,7 +47,25 @@ def add_user():
     )
     mysql.connection.commit()
     cur.close()
-    return "added user"
+    return json.dumps(user)
+
+
+@server.route("/update-user", methods=["PUT"])
+def update_user():
+    user = request.json
+    user_id = user["id"]
+    username = user["username"]
+    password = user["password"]
+    email = user["email"]
+    cur = mysql.connection.cursor()
+    cur.execute(
+        f"UPDATE  Users \
+                SET username = '{username}', password = '{password}', email = '{email}' \
+                WHERE id = '{user_id}';"
+    )
+    mysql.connection.commit()
+    cur.close()
+    return json.dumps(user)
 
 
 @server.route("/delete-user", methods=["DELETE"])
@@ -47,7 +76,7 @@ def delete_user():
     cur.execute(f"DELETE FROM Users WHERE id='{user_id}';")
     mysql.connection.commit()
     cur.close()
-    return "deleted user"
+    return json.dumps(user)
 
 
 if __name__ == "__main__":
