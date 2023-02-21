@@ -4,25 +4,24 @@ from flask_mysqldb import MySQL
 
 server = Flask(__name__)
 
-# TODO: read env_vars not  regular string
-server.config["MYSQL_HOST"] = "mysql"
-server.config["MYSQL_USER"] = "root"
-server.config["MYSQL_PASSWORD"] = "password"
-server.config["MYSQL_DB"] = "users"
+server.config["MYSQL_HOST"] = os.environ.get("MYSQL_HOST")
+server.config["MYSQL_USER"] = os.environ.get("MYSQL_USER")
+server.config["MYSQL_PASSWORD"] = os.environ.get("MYSQL_PASSWORD")
+server.config["MYSQL_DB"] = os.environ.get("MYSQL_DB")
 
 mysql = MySQL(server)
 
 
-@server.route("/users", methods=["GET"])
+@server.route("/jobs", methods=["GET"])
 def index():
     cur = mysql.connection.cursor()
-    _ = cur.execute(f"SELECT * FROM Users")
+    _ = cur.execute(f"SELECT * FROM Jobs")
     user_details = cur.fetchall()
     cur.close()
     return json.dumps(user_details)
 
 
-@server.route("/add-user", methods=["POST"])
+@server.route("/add-job", methods=["POST"])
 def add_user():
     user_details = request.json
     username = user_details["username"]
