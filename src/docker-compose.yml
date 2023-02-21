@@ -13,7 +13,7 @@ services:
   #     MYSQL_DB: "db"
   #     MYSQL_PORT: "3306"
   db_test:
-    build: ./db
+    build: ./db_test
     restart: always
     ports:
       - "5000:5000"
