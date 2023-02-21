@@ -42,3 +42,14 @@ class UserRepo(object):
         self.mysql.connection.commit()
         cur.close()
         return user
+
+    def update_user(self, user: User) -> User:
+        cur = self.mysql.connection.cursor()
+        cur.execute(
+            f"UPDATE  Users \
+                    SET username = '{user['username']}', password = '{user['password']}', email = '{user['email']}' \
+                    WHERE id = '{user['id']}';"
+        )
+        self.mysql.connection.commit()
+        cur.close()
+        return user

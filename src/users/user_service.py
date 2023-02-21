@@ -15,3 +15,6 @@ class UserService(object):
 
     def create_user(self, user: User) -> User:
         return self.repo.create_user(user)
+
+    def update_user(self, user: User) -> User:
+        return self.repo.update_user(user)

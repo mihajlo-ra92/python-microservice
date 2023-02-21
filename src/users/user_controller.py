@@ -31,28 +31,16 @@ def read_user():
 
 @server.route("/create-user", methods=["POST"])
 def create_user():
-    user_json = request.json
-    read_user: User = user_json
-    created_user: User = service.create_user(read_user)
+    sent_user: User = request.json
+    created_user: User = service.create_user(sent_user)
     return created_user
 
 
 @server.route("/update-user", methods=["PUT"])
 def update_user():
-    user = request.json
-    user_id = user["id"]
-    username = user["username"]
-    password = user["password"]
-    email = user["email"]
-    cur = mysql.connection.cursor()
-    cur.execute(
-        f"UPDATE  Users \
-                SET username = '{username}', password = '{password}', email = '{email}' \
-                WHERE id = '{user_id}';"
-    )
-    mysql.connection.commit()
-    cur.close()
-    return json.dumps(user)
+    sent_user: User = request.json
+    updated_user: User = service.update_user(sent_user)
+    return updated_user
 
 
 @server.route("/delete-user", methods=["DELETE"])
