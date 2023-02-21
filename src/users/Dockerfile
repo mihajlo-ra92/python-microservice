@@ -12,4 +12,4 @@ COPY . /app
 
 EXPOSE 5000
 
-CMD ["python3", "users.py"]
+CMD ["python3", "user_controller.py"]

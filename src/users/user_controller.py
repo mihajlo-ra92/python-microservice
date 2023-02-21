@@ -1,6 +1,7 @@
 import os, uuid, json
 from flask import Flask, request
 from flask_mysqldb import MySQL
+from user_service import UserService
 
 server = Flask(__name__)
 
@@ -10,14 +11,12 @@ server.config["MYSQL_PASSWORD"] = os.environ.get("MYSQL_PASSWORD")
 server.config["MYSQL_DB"] = os.environ.get("MYSQL_DB")
 
 mysql = MySQL(server)
+service = UserService(mysql)
 
 
 @server.route("/read-users", methods=["GET"])
 def read_users():
-    cur = mysql.connection.cursor()
-    cur.execute(f"SELECT * FROM Users")
-    users = cur.fetchall()
-    cur.close()
+    users = service.read_all()
     return json.dumps(users)
 
 
@@ -25,11 +24,8 @@ def read_users():
 def read_user():
     sent_user = request.json
     user_id = sent_user["id"]
-    cur = mysql.connection.cursor()
-    cur.execute(f"SELECT * FROM Users WHERE id='{user_id}';")
-    read_user = cur.fetchall()
-    cur.close()
-    return json.dumps(read_user)
+    user = service.read_user(user_id)
+    return json.dumps(user)
 
 
 @server.route("/create-user", methods=["POST"])
