@@ -11,7 +11,9 @@ import jwt
 from user_model import UserData
 from user_service import UserService
 
-SECRET_KEY = "37de7552-b2e9-11ed-875c-45eb8b791582"
+SECRET_KEY = os.environ.get("SECRET_KEY")
+# SECRET_KEY = "37de7552-b2e9-11ed-875c-45eb8b791582"
+
 
 def init_app() -> Flask:
     app = Flask(__name__)
@@ -33,9 +35,7 @@ def set_start() -> tuple[Flask, MySQL, Logger, UserService]:
 def token_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
-        token = request.headers.get(
-            "Bearer"
-        )  
+        token = request.headers.get("Bearer")
         if not token:
             return json.dumps({"text": "Token is missing"}), 401
         try:

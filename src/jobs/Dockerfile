@@ -12,4 +12,4 @@ COPY . /app
 
 EXPOSE 5000
 
-CMD ["python3", "jobs.py"]
+CMD ["python3", "job_controller.py"]

@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from functools import wraps
-import requests, json, jwt, datetime
+import requests, json, jwt, datetime, os
 from flask import Flask, jsonify, request
 from logging.config import dictConfig
 
@@ -24,7 +24,7 @@ dictConfig(
 )
 app = Flask(__name__)
 
-app.config["SECRET_KEY"] = "verysecret"
+app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY")
 
 
 @dataclass
