@@ -1,4 +1,4 @@
-import requests, json
+import requests, json, jwt, datetime
 from flask import Flask, jsonify, request
 from logging.config import dictConfig
 
@@ -22,6 +22,8 @@ dictConfig(
 )
 app = Flask(__name__)
 
+app.config["SECRET_KEY"] = "verysecret"
+
 
 @app.route("/unprotected")
 def unprotected():
@@ -40,8 +42,20 @@ def login():
         "http://users:5000/check-info",
         json={"username": username, "password": password},
     )
+    try:
+        req.json()["text"]
+        return req.json(), 401
+    except:
+        pass
 
-    return req.json(), 200
+    token = jwt.encode(
+        {
+            "user": username,
+            "exp": datetime.datetime.utcnow() + datetime.timedelta(hours=24),
+        },
+        app.config["SECRET_KEY"],
+    )
+    return json.dumps({"token": token}), 201
 
 
 if __name__ == "__main__":

@@ -98,7 +98,6 @@ def delete():
 
 @server.route("/check-info", methods=["GET"])
 def check_info():
-    logger.info(request.json)
     try:
         username, password = request.json["username"], request.json["password"]
     except Exception as inst:
