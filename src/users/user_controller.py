@@ -1,4 +1,5 @@
 import os, uuid, json
+from typing import Optional, Union
 from flask import Flask, request
 from flask_mysqldb import MySQL
 from user_service import UserService
@@ -47,21 +48,33 @@ def read_all():
 @server.route("/read-by-id", methods=["GET"])
 def read_by_id():
     sent_user = request.json
-    user_id = sent_user["id"]
-    user: User = service.read_by_id(user_id)
+    try:
+        user_id = sent_user["id"]
+    except Exception as inst:
+        logger.info(inst)
+        return json.dumps({"text": "Please send id"}), 400
+    user: Optional[User] = service.read_by_id(user_id)
+    if user == None:
+        return json.dumps({"text": "Invalid user_id"}), 400
     return json.dumps(user), 200
 
 
 @server.route("/read-by-username", methods=["GET"])
 def read_by_username():
-    sent_user = request.json
-    username = sent_user["username"]
+    try:
+        username = request.json["username"]
+    except Exception as inst:
+        logger.info(inst)
+        return json.dumps({"text": "Please send username"}), 400
     user: User = service.read_by_username(username)
+    if user == None:
+        return json.dumps({"text": "Invalid username"}), 400
     return json.dumps(user), 200
 
 
 @server.route("/create-user", methods=["POST"])
 def create():
+    # TODO: check request.json, if invalid send bad request
     sent_user: User = request.json
     created_user: User = service.create(sent_user)
     return created_user, 201
@@ -69,6 +82,7 @@ def create():
 
 @server.route("/update-user", methods=["PUT"])
 def update():
+    # TODO: check request.json, if invalid send bad request
     sent_user: User = request.json
     updated_user: User = service.update(sent_user)
     return updated_user, 200
@@ -76,6 +90,7 @@ def update():
 
 @server.route("/delete-user", methods=["DELETE"])
 def delete():
+    # TODO: check request.json for id, if invalid send bad request
     sent_user: User = request.json
     deleted: bool = service.delete_by_id(sent_user["id"])
     return json.dumps(deleted), 200
@@ -84,10 +99,18 @@ def delete():
 @server.route("/check-info", methods=["GET"])
 def check_info():
     logger.info(request.json)
-    return json.dumps(request.json), 200
-    username, password = request.json["username", "password"]
-    valid: bool = service.check_info(username, password)
-    return "HELLO !!!", 200
+    try:
+        username, password = request.json["username"], request.json["password"]
+    except Exception as inst:
+        logger.info(inst)
+        return json.dumps({"text": "Please send username and password"}), 400
+    jwt_data: Union[str, tuple[str, str]] = service.check_info(username, password)
+    logger.info(jwt_data)
+    if jwt_data == "Username invalid":
+        return json.dumps({"text": jwt_data}), 401
+    if jwt_data == "Password invalid":
+        return json.dumps({"text": jwt_data}), 401
+    return json.dumps({"username": jwt_data[0], "user_type": jwt_data[1]})
 
 
 if __name__ == "__main__":

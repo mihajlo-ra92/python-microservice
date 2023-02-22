@@ -1,4 +1,5 @@
 import json, uuid
+from typing import Optional
 from logging import Logger
 from flask_mysqldb import MySQL
 from user_model import User
@@ -12,7 +13,7 @@ class UserRepo(object):
     def read_all(self) -> list[User]:
         self.logger.info("!!! FROM REPO !!!")
         cur = self.mysql.connection.cursor()
-        cur.execute(f"SELECT * FROM Users")
+        cur.execute(f"SELECT id, username, email, user_type FROM Users")
         row_headers = [x[0] for x in cur.description]
         retVal = cur.fetchall()
         cur.close()
@@ -22,7 +23,7 @@ class UserRepo(object):
         users: list[User] = json_data
         return users
 
-    def read_by_id(self, user_id) -> User:
+    def read_by_id(self, user_id) -> Optional[User]:
         cur = self.mysql.connection.cursor()
         cur.execute(f"SELECT * FROM Users WHERE id='{user_id}';")
         row_headers = [x[0] for x in cur.description]
@@ -33,9 +34,11 @@ class UserRepo(object):
         for result in retVal:
             json_data.append(dict(zip(row_headers, result)))
         users: list[User] = json_data
-        return users[0]
+        if len(users) > 0:
+            return users[0]
+        return None
 
-    def read_by_username(self, username) -> User:
+    def read_by_username(self, username) -> Optional[User]:
         cur = self.mysql.connection.cursor()
         cur.execute(f"SELECT * FROM Users WHERE username='{username}';")
         row_headers = [x[0] for x in cur.description]
@@ -46,7 +49,9 @@ class UserRepo(object):
         for result in retVal:
             json_data.append(dict(zip(row_headers, result)))
         users: list[User] = json_data
-        return users[0]
+        if len(users) > 0:
+            return users[0]
+        return None
 
     def create(self, user: User) -> User:
         user["id"] = str(uuid.uuid1())
