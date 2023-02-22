@@ -84,6 +84,9 @@ def delete():
 @server.route("/check-info", methods=["GET"])
 def check_info():
     logger.info(request.json)
+    return json.dumps(request.json), 200
+    username, password = request.json["username", "password"]
+    valid: bool = service.check_info(username, password)
     return "HELLO !!!", 200
 
 
