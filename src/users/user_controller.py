@@ -1,51 +1,24 @@
-import os, uuid, json
+import json
 from typing import Optional, Union
-from flask import Flask, request
-from flask_mysqldb import MySQL
+from flask import request
 from user_service import UserService
-from user_model import User
-from logging.config import dictConfig
+from user_model import User, UserData
+
+from user_utils import set_logger_config, set_start
 
 
-dictConfig(
-    {
-        "version": 1,
-        "formatters": {
-            "default": {
-                "format": "[%(asctime)s] %(levelname)s in %(module)s: %(message)s",
-            }
-        },
-        "handlers": {
-            "wsgi": {
-                "class": "logging.StreamHandler",
-                "stream": "ext://flask.logging.wsgi_errors_stream",
-                "formatter": "default",
-            }
-        },
-        "root": {"level": "INFO", "handlers": ["wsgi"]},
-    }
-)
-
-server = Flask(__name__)
-
-server.config["MYSQL_HOST"] = os.environ.get("MYSQL_HOST")
-server.config["MYSQL_USER"] = os.environ.get("MYSQL_USER")
-server.config["MYSQL_PASSWORD"] = os.environ.get("MYSQL_PASSWORD")
-server.config["MYSQL_DB"] = os.environ.get("MYSQL_DB")
-
-mysql = MySQL(server)
-service = UserService(mysql, server.logger)
-logger = server.logger
+set_logger_config()
+[app, mysql, logger, service] = set_start()
 
 
-@server.route("/read-users", methods=["GET"])
+@app.route("/read-users", methods=["GET"])
 def read_all():
     logger.info("!!! FROM CONTROLLER !!!")
     users: list[User] = service.read_all()
     return json.dumps(users), 200
 
 
-@server.route("/read-by-id", methods=["GET"])
+@app.route("/read-by-id", methods=["GET"])
 def read_by_id():
     sent_user = request.json
     try:
@@ -59,7 +32,7 @@ def read_by_id():
     return json.dumps(user), 200
 
 
-@server.route("/read-by-username", methods=["GET"])
+@app.route("/read-by-username", methods=["GET"])
 def read_by_username():
     try:
         username = request.json["username"]
@@ -72,7 +45,7 @@ def read_by_username():
     return json.dumps(user), 200
 
 
-@server.route("/create-user", methods=["POST"])
+@app.route("/create-user", methods=["POST"])
 def create():
     # TODO: check request.json, if invalid send bad request
     sent_user: User = request.json
@@ -80,7 +53,7 @@ def create():
     return created_user, 201
 
 
-@server.route("/update-user", methods=["PUT"])
+@app.route("/update-user", methods=["PUT"])
 def update():
     # TODO: check request.json, if invalid send bad request
     sent_user: User = request.json
@@ -88,7 +61,7 @@ def update():
     return updated_user, 200
 
 
-@server.route("/delete-user", methods=["DELETE"])
+@app.route("/delete-user", methods=["DELETE"])
 def delete():
     # TODO: check request.json for id, if invalid send bad request
     sent_user: User = request.json
@@ -96,7 +69,7 @@ def delete():
     return json.dumps(deleted), 200
 
 
-@server.route("/check-info", methods=["GET"])
+@app.route("/check-info", methods=["GET"])
 def check_info():
     try:
         username, password = request.json["username"], request.json["password"]
@@ -113,4 +86,4 @@ def check_info():
 
 
 if __name__ == "__main__":
-    server.run(host="0.0.0.0", port=5000)
+    app.run(host="0.0.0.0", port=5000)

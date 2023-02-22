@@ -1,3 +1,6 @@
+from dataclasses import dataclass
+
+
 class User(object):
     def __init__(
         self, id: str, username: str, password: str, email: str, user_type: str
@@ -15,3 +18,9 @@ class User(object):
 #     worker = "WORKER"
 #     employer = "EMPLOYER"
 #     admin = "ADMIN"
+
+
+@dataclass
+class UserData:
+    username: str
+    user_type: str
