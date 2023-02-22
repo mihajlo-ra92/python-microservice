@@ -1,13 +1,16 @@
 import json, uuid
+from logging import Logger
 from flask_mysqldb import MySQL
 from user_model import User
 
 
 class UserRepo(object):
-    def __init__(self, mysql: MySQL):
+    def __init__(self, mysql: MySQL, logger: Logger):
         self.mysql = mysql
+        self.logger = logger
 
     def read_all(self) -> list[User]:
+        self.logger.info("!!! FROM REPO !!!")
         cur = self.mysql.connection.cursor()
         cur.execute(f"SELECT * FROM Users")
         row_headers = [x[0] for x in cur.description]
@@ -19,7 +22,7 @@ class UserRepo(object):
         users: list[User] = json_data
         return users
 
-    def read_user(self, user_id) -> User:
+    def read_by_id(self, user_id) -> User:
         cur = self.mysql.connection.cursor()
         cur.execute(f"SELECT * FROM Users WHERE id='{user_id}';")
         row_headers = [x[0] for x in cur.description]
@@ -32,7 +35,7 @@ class UserRepo(object):
         users: list[User] = json_data
         return users[0]
 
-    def create_user(self, user: User) -> User:
+    def create(self, user: User) -> User:
         user["id"] = str(uuid.uuid1())
         cur = self.mysql.connection.cursor()
         cur.execute(
@@ -43,7 +46,7 @@ class UserRepo(object):
         cur.close()
         return user
 
-    def update_user(self, user: User) -> User:
+    def update(self, user: User) -> User:
         cur = self.mysql.connection.cursor()
         cur.execute(
             f"UPDATE  Users \
@@ -53,3 +56,10 @@ class UserRepo(object):
         self.mysql.connection.commit()
         cur.close()
         return user
+
+    def delete_by_id(self, user_id: str) -> bool:
+        cur = self.mysql.connection.cursor()
+        cur.execute(f"DELETE FROM Users WHERE id='{user_id}';")
+        self.mysql.connection.commit()
+        cur.close()
+        return True

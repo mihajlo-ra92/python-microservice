@@ -3,6 +3,27 @@ from flask import Flask, request
 from flask_mysqldb import MySQL
 from user_service import UserService
 from user_model import User
+from logging.config import dictConfig
+
+
+dictConfig(
+    {
+        "version": 1,
+        "formatters": {
+            "default": {
+                "format": "[%(asctime)s] %(levelname)s in %(module)s: %(message)s",
+            }
+        },
+        "handlers": {
+            "wsgi": {
+                "class": "logging.StreamHandler",
+                "stream": "ext://flask.logging.wsgi_errors_stream",
+                "formatter": "default",
+            }
+        },
+        "root": {"level": "INFO", "handlers": ["wsgi"]},
+    }
+)
 
 server = Flask(__name__)
 
@@ -12,46 +33,43 @@ server.config["MYSQL_PASSWORD"] = os.environ.get("MYSQL_PASSWORD")
 server.config["MYSQL_DB"] = os.environ.get("MYSQL_DB")
 
 mysql = MySQL(server)
-service = UserService(mysql)
+service = UserService(mysql, server.logger)
 
 
 @server.route("/read-users", methods=["GET"])
-def read_users():
+def read_all():
+    server.logger.info("!!! FROM CONTROLLER !!!")
     users: list[User] = service.read_all()
     return json.dumps(users)
 
 
 @server.route("/read-user", methods=["GET"])
-def read_user():
+def read():
     sent_user = request.json
     user_id = sent_user["id"]
-    user: User = service.read_user(user_id)
+    user: User = service.read_by_id(user_id)
     return json.dumps(user)
 
 
 @server.route("/create-user", methods=["POST"])
-def create_user():
+def create():
     sent_user: User = request.json
-    created_user: User = service.create_user(sent_user)
+    created_user: User = service.create(sent_user)
     return created_user
 
 
 @server.route("/update-user", methods=["PUT"])
-def update_user():
+def update():
     sent_user: User = request.json
-    updated_user: User = service.update_user(sent_user)
+    updated_user: User = service.update(sent_user)
     return updated_user
 
 
 @server.route("/delete-user", methods=["DELETE"])
-def delete_user():
-    user = request.json
-    user_id = user["id"]
-    cur = mysql.connection.cursor()
-    cur.execute(f"DELETE FROM Users WHERE id='{user_id}';")
-    mysql.connection.commit()
-    cur.close()
-    return json.dumps(user)
+def delete():
+    sent_user: User = request.json
+    deleted: bool = service.delete_by_id(sent_user["id"])
+    return json.dumps(deleted)
 
 
 if __name__ == "__main__":
