@@ -1,17 +1,5 @@
 version: "3"
 services:
-  # frontend:
-  #   build: ./frontend
-  # auth:
-  #   build: ./auth
-  #   ports:
-  #     - "5001:5000"
-  #   environment:
-  #     MYSQL_HOST: mysql
-  #     MYSQL_USER: "user"
-  #     MYSQL_PASSWORD: "password"
-  #     MYSQL_DB: "db"
-  #     MYSQL_PORT: "3306"
   users:
     build: ./users
     restart: always
@@ -37,6 +25,12 @@ services:
       MYSQL_DB: mysql_db
     depends_on:
       - mysql
+
+  auth:
+    build: ./auth
+    restart: always
+    ports:
+      - "5002:5000"
 
   mysql:
     image: mysql:5.7

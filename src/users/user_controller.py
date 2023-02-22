@@ -34,42 +34,57 @@ server.config["MYSQL_DB"] = os.environ.get("MYSQL_DB")
 
 mysql = MySQL(server)
 service = UserService(mysql, server.logger)
+logger = server.logger
 
 
 @server.route("/read-users", methods=["GET"])
 def read_all():
-    server.logger.info("!!! FROM CONTROLLER !!!")
+    logger.info("!!! FROM CONTROLLER !!!")
     users: list[User] = service.read_all()
-    return json.dumps(users)
+    return json.dumps(users), 200
 
 
-@server.route("/read-user", methods=["GET"])
-def read():
+@server.route("/read-by-id", methods=["GET"])
+def read_by_id():
     sent_user = request.json
     user_id = sent_user["id"]
     user: User = service.read_by_id(user_id)
-    return json.dumps(user)
+    return json.dumps(user), 200
+
+
+@server.route("/read-by-username", methods=["GET"])
+def read_by_username():
+    sent_user = request.json
+    username = sent_user["username"]
+    user: User = service.read_by_username(username)
+    return json.dumps(user), 200
 
 
 @server.route("/create-user", methods=["POST"])
 def create():
     sent_user: User = request.json
     created_user: User = service.create(sent_user)
-    return created_user
+    return created_user, 201
 
 
 @server.route("/update-user", methods=["PUT"])
 def update():
     sent_user: User = request.json
     updated_user: User = service.update(sent_user)
-    return updated_user
+    return updated_user, 200
 
 
 @server.route("/delete-user", methods=["DELETE"])
 def delete():
     sent_user: User = request.json
     deleted: bool = service.delete_by_id(sent_user["id"])
-    return json.dumps(deleted)
+    return json.dumps(deleted), 200
+
+
+@server.route("/check-info", methods=["GET"])
+def check_info():
+    logger.info(request.json)
+    return "HELLO !!!", 200
 
 
 if __name__ == "__main__":

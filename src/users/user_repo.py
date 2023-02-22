@@ -35,6 +35,19 @@ class UserRepo(object):
         users: list[User] = json_data
         return users[0]
 
+    def read_by_username(self, username) -> User:
+        cur = self.mysql.connection.cursor()
+        cur.execute(f"SELECT * FROM Users WHERE username='{username}';")
+        row_headers = [x[0] for x in cur.description]
+        retVal = cur.fetchall()
+        cur.close()
+        json_data = []
+
+        for result in retVal:
+            json_data.append(dict(zip(row_headers, result)))
+        users: list[User] = json_data
+        return users[0]
+
     def create(self, user: User) -> User:
         user["id"] = str(uuid.uuid1())
         cur = self.mysql.connection.cursor()

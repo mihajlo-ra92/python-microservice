@@ -16,11 +16,14 @@ class UserService(object):
     def read_by_id(self, user_id: str) -> User:
         return self.repo.read_by_id(user_id)
 
+    def read_by_username(self, username: str) -> User:
+        return self.repo.read_by_username(username)
+
     def create(self, user: User) -> User:
-        return self.repo.create_user(user)
+        return self.repo.create(user)
 
     def update(self, user: User) -> User:
-        return self.repo.update_user(user)
+        return self.repo.update(user)
 
     def delete_by_id(self, user_id) -> bool:
-        return self.repo.delte_by_id(user_id)
+        return self.repo.delete_by_id(user_id)
