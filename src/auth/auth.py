@@ -41,13 +41,13 @@ def token_required(f):
         )  # http://localhost:5002/route?token=eydsafdsaf
         app.logger.info(token)
         if not token:
-            return json.dumps({"text": "Token is missing"}), 401
+            return json.dumps({"message": "Token is missing"}), 401
         try:
             data = jwt.decode(token, app.config["SECRET_KEY"], algorithms=["HS256"])
         except Exception as inst:
             app.logger.info(inst)
-            return json.dumps({"text": "Token is missing or invalid"}), 401
-        user_data = UserData(data["user"], data["user_type"])
+            return json.dumps({"message": "Token is missing or invalid"}), 401
+        user_data = UserData(data["username"], data["user_type"])
         return f(user_data, *args, **kwargs)
 
     return decorated
@@ -72,14 +72,14 @@ def login():
         json={"username": username, "password": password},
     )
     try:
-        req.json()["text"]
+        req.json()["message"]
         return req.json(), 401
     except:
         pass
 
     token = jwt.encode(
         {
-            "user": username,
+            "username": username,
             "user_type": req.json()["user_type"],
             "exp": datetime.datetime.utcnow() + datetime.timedelta(hours=24),
         },

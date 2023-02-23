@@ -9,7 +9,7 @@ services:
       MYSQL_HOST: mysql
       MYSQL_USER: root
       MYSQL_PASSWORD: password
-      MYSQL_DB: mysql_db
+      MYSQL_DB: users_db
     depends_on:
       - mysql
 
@@ -22,7 +22,7 @@ services:
       MYSQL_HOST: mysql
       MYSQL_USER: root
       MYSQL_PASSWORD: password
-      MYSQL_DB: mysql_db
+      MYSQL_DB: jobs_db
     env_file:
       - global.env
     depends_on:
