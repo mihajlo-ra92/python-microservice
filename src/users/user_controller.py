@@ -1,4 +1,5 @@
 import json
+import os
 from typing import Optional, Union
 from flask import request
 from user_model import User, UserData
@@ -12,7 +13,8 @@ set_logger_config()
 
 @app.route("/read-users", methods=["GET"])
 def read_all():
-    logger.info("!!! FROM CONTROLLER !!!")
+    logger.info("!!! DATABASE: !!!")
+    logger.info(app.config["MYSQL_DB"])
     users: list[User] = service.read_all()
     return json.dumps(users), 200
 
@@ -31,13 +33,22 @@ def read_by_id():
     return json.dumps(user), 200
 
 
-@app.route("/read-by-username", methods=["GET"])
+# NOTE: Reads by username in jwt
+@app.route("/read-logged-user", methods=["GET"])
 @token_required
+def read_logged_user(user_data):
+    logged_user: UserData = user_data
+    username = logged_user.username
+    user: User = service.read_logged_user(username)
+    if user == None:
+        return json.dumps({"message": "Invalid username"}), 400
+    return json.dumps(user), 200
+
+
+@app.route("/read-by-username", methods=["GET"])
 def read_by_username():
-    # TODO: read username from token
     try:
-        logged_user: UserData = read_jwt(request.headers["Bearer"])
-        username = logged_user.username
+        username = request.json["username"]
     except Exception as inst:
         logger.info(inst)
         return json.dumps({"message": "Please send username"}), 400
@@ -55,7 +66,7 @@ def create():
         logger.info(inst)
         return json.dumps({"message": "Please send all user data"}), 400
     created_user: User = service.create(sent_user)
-    return created_user, 201
+    return created_user.toJSON(), 201
 
 
 @app.route("/update-user", methods=["PUT"])
@@ -74,7 +85,7 @@ def update():
 
 @app.route("/delete-user", methods=["DELETE"])
 @token_required
-def delete():
+def delete(user_data):
     # TODO: check request.json for id, if invalid send bad request
     sent_user: User = request.json
     deleted: bool = service.delete_by_id(sent_user["id"])

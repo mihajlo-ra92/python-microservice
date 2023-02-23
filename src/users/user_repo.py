@@ -54,11 +54,12 @@ class UserRepo(object):
         return None
 
     def create(self, user: User) -> User:
-        user["id"] = str(uuid.uuid1())
+        # TODO: handle taken unique field
+        user.id = str(uuid.uuid1())
         cur = self.mysql.connection.cursor()
         cur.execute(
             f"INSERT INTO Users(id, username, password, email, user_type) VALUES \
-            ('{user['id']}', '{user['username']}', '{user['password']}', '{user['email']}', '{user['user_type']}');"
+            ('{user.id}', '{user.username}', '{user.password}', '{user.email}', '{user.user_type}');"
         )
         self.mysql.connection.commit()
         cur.close()

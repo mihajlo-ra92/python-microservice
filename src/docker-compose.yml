@@ -10,6 +10,8 @@ services:
       MYSQL_USER: root
       MYSQL_PASSWORD: password
       MYSQL_DB: users_db
+    env_file:
+      - global.env
     depends_on:
       - mysql
 

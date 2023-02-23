@@ -12,7 +12,6 @@ from user_model import User, UserData
 from user_service import UserService
 
 SECRET_KEY = os.environ.get("SECRET_KEY")
-# SECRET_KEY = "37de7552-b2e9-11ed-875c-45eb8b791582"
 
 
 def init_app() -> Flask:
@@ -20,7 +19,10 @@ def init_app() -> Flask:
     app.config["MYSQL_HOST"] = os.environ.get("MYSQL_HOST")
     app.config["MYSQL_USER"] = os.environ.get("MYSQL_USER")
     app.config["MYSQL_PASSWORD"] = os.environ.get("MYSQL_PASSWORD")
-    app.config["MYSQL_DB"] = os.environ.get("MYSQL_DB")
+    if os.environ.get("TEST") == "TRUE":
+        app.config["MYSQL_DB"] = os.environ.get("MYSQL_DB") + "_test"
+    else:
+        app.config["MYSQL_DB"] = os.environ.get("MYSQL_DB")
     return app
 
 
@@ -41,7 +43,7 @@ def token_required(f):
         try:
             data = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
         except Exception as inst:
-            return json.dumps({"message": "Token is missing or invalid"}), 401
+            return json.dumps({"message": "Token is invalid"}), 401
         user_data = UserData(data["username"], data["user_type"])
         return f(user_data, *args, **kwargs)
 

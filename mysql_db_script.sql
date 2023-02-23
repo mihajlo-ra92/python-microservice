@@ -39,8 +39,8 @@ VALUES
 ('24b4af14-b1fe-11ed-875c-45eb8b791582','7247bc7a-b1dc-11ed-875c-45eb8b791582', '6a54a320-b1dc-11ed-875c-45eb8b791582', 'Mopping', 'I need someone to mop the floor of my auto shop', 35.0, true),
 ('2c5d4f28-b1fe-11ed-875c-45eb8b791582','7247bc7a-b1dc-11ed-875c-45eb8b791582', '7bd3a8e4-b1dc-11ed-875c-45eb8b791582', 'Overnight security', 'I need someone to watch my auto shop during the night', 15.0, false);
 
-CREATE DATABASE users_test_db;
-USE users_test_db;
+CREATE DATABASE users_db_test;
+USE users_db_test;
 
 CREATE TABLE Users (
 id VARCHAR(255) PRIMARY KEY,
@@ -50,8 +50,8 @@ email VARCHAR(50) NOT NULL UNIQUE,
 user_type ENUM ('WORKER', 'EMPLOYER', 'ADMIN') NOT NULL
 );
 
-CREATE DATABASE jobs_test_db;
-USE jobs_test_db;
+CREATE DATABASE jobs_db_test;
+USE jobs_db_test;
 
 CREATE TABLE Jobs (
 id VARCHAR(255) PRIMARY KEY,

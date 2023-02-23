@@ -26,6 +26,10 @@ class UserService(object):
             read_user["password"] = None
         return read_user
 
+    def read_logged_user(self, username: str) -> Optional[User]:
+        read_user = self.repo.read_by_username(username)
+        return read_user
+
     def create(self, user: User) -> User:
         return self.repo.create(user)
 
