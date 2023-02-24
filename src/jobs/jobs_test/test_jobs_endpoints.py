@@ -118,3 +118,35 @@ def test_create_job_invalid():
         },
     )
     assert req.json()["message"] == "Please send all job data"
+
+
+def test_create_job_worker():
+    req = requests.post(
+        "http://localhost:5001/create-job",
+        json={
+            "id": "job6",
+            "employer_id": "worker1",
+            "worker_id": "worker2",
+            "job_name": "name1",
+            "job_desc": "desc1",
+            "pay_in_euro": 1.0,
+            "completed": 0,
+        },
+    )
+    assert req.json()["message"] == "Sent employer_id must be of an employer"
+
+
+def test_create_job_invalid_employer_id():
+    req = requests.post(
+        "http://localhost:5001/create-job",
+        json={
+            "id": "job6",
+            "employer_id": "invalid",
+            "worker_id": "worker2",
+            "job_name": "name1",
+            "job_desc": "desc1",
+            "pay_in_euro": 1.0,
+            "completed": 0,
+        },
+    )
+    assert req.json()["message"] == "Sent employer_id not valid"

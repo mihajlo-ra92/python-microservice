@@ -3,6 +3,7 @@ from typing import Optional, Union
 from flask_mysqldb import MySQL
 from job_repo import JobRepo
 from job_model import MyException, Job, UserData
+import requests
 
 
 class JobService(object):
@@ -24,8 +25,15 @@ class JobService(object):
         return self.repo.read_by_worker_id(worker_id)
 
     def create(self, job: Job) -> Union[Exception, Job]:
-        # TODO: Check if employer_id is valid
-        # send http to users service to check
+        req = requests.get("http://users:5000/read-by-id", json={"id": job.employer_id})
+        self.logger.info(f"recived req json: {req.json()}")
+        try:
+            if req.json()["message"] == "Invalid user_id":
+                return MyException("Sent employer_id not valid")
+        except Exception as ex:
+            if req.json()["user_type"] != "EMPLOYER":
+                return MyException("Sent employer_id must be of an employer")
+
         return self.repo.create(job)
 
     def update(self, job: Job) -> Union[Exception, Job]:

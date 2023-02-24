@@ -24,6 +24,23 @@ def init_test_db():
         ('job5','employer1', NULL, 'name5', 'desc5', 5.0, false);"
         )
         mysql.connection.commit()
+        users_db_test = os.environ.get("MYSQL_DB_USERS") + "_test"
+        logger.info(f"usersDB: {users_db_test}")
+        cur.execute(f"USE {users_db_test}")
+        cur.execute("DELETE FROM Users;")
+        cur.execute(
+            "INSERT INTO Users (id, username, password, email, \
+        user_type) VALUES ('employer1',\
+        'emp_us_1', '123', 'test1@gmail.com', 'EMPLOYER'),\
+        ('worker1',\
+        'test2', '123', 'test2@gmail.com', 'WORKER'), \
+        ('33333333-b392-11ed-92c6-0242ac170004',\
+        'test3', '123', 'test3@gmail.com', 'ADMIN');"
+        )
+        jobs_db_test = os.environ.get("MYSQL_DB_JOBS") + "_test"
+        logger.info(f"jobsDB: {jobs_db_test}")
+        cur.execute(f"USE {jobs_db_test}")
+        mysql.connection.commit()
         cur.close()
     return ""
 
@@ -50,7 +67,6 @@ def read_by_id():
 
 @app.route("/create-job", methods=["POST"])
 def create_job():
-    # TODO: Check if employer_id is vaild
     try:
         sent_job: Job = read_job(request.json)
     except Exception as ex:

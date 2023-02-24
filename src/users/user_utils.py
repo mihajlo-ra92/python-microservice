@@ -16,9 +16,9 @@ def init_app() -> Flask:
     app.config["MYSQL_USER"] = os.environ.get("MYSQL_USER")
     app.config["MYSQL_PASSWORD"] = os.environ.get("MYSQL_PASSWORD")
     if os.environ.get("TEST") == "TRUE":
-        app.config["MYSQL_DB"] = os.environ.get("MYSQL_DB") + "_test"
+        app.config["MYSQL_DB"] = os.environ.get("MYSQL_DB_USERS") + "_test"
     else:
-        app.config["MYSQL_DB"] = os.environ.get("MYSQL_DB")
+        app.config["MYSQL_DB"] = os.environ.get("MYSQL_DB_USERS")
     return app
 
 
