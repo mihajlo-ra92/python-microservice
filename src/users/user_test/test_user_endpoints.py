@@ -1,9 +1,8 @@
 import requests, os, jwt, pytest
 from dotenv import load_dotenv
-import mysql.connector
 
 
-project_folder = os.path.expanduser("../")  # adjust as appropriate thats my directory
+project_folder = os.path.expanduser("../../")
 load_dotenv(os.path.join(project_folder, "global.env"))
 
 
@@ -46,15 +45,26 @@ def test_init():
     )
     assert req.json() == [
         {
+            "id": "22222222-b392-11ed-92c6-0242ac170004",
+            "username": "test2",
+            "email": "test2@gmail.com",
+            "user_type": "EMPLOYER",
+        },
+        {
+            "id": "33333333-b392-11ed-92c6-0242ac170004",
+            "username": "test3",
+            "email": "test3@gmail.com",
+            "user_type": "ADMIN",
+        },
+        {
             "id": "43299a1e-b392-11ed-92c6-0242ac170004",
             "username": "test1",
             "email": "test1@gmail.com",
             "user_type": "WORKER",
-        }
+        },
     ]
 
 
-# TODO: Move into auth tests
 def test_login():
     req = requests.post(
         "http://localhost:5002/login", json={"username": "test1", "password": "123"}
@@ -153,13 +163,13 @@ def test_create_user_valid():
     req = requests.post(
         "http://localhost:5000/create-user",
         json={
-            "username": "test2",
+            "username": "test4",
             "password": "123",
-            "email": "test2@gmail.com",
+            "email": "test4@gmail.com",
             "user_type": "WORKER",
         },
     )
-    assert req.json()["username"] == "test2"
+    assert req.json()["username"] == "test4"
     assert req.status_code == 201
 
 

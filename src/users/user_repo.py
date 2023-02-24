@@ -54,7 +54,6 @@ class UserRepo(object):
         return None
 
     def create(self, user: User) -> Union[Exception, User]:
-        # TODO: handle taken unique field
         user.id = str(uuid.uuid1())
         cur = self.mysql.connection.cursor()
         try:

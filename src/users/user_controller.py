@@ -29,7 +29,11 @@ def init_test_db():
         cur.execute(
             "INSERT INTO Users (id, username, password, email, \
         user_type) VALUES ('43299a1e-b392-11ed-92c6-0242ac170004',\
-        'test1', '123', 'test1@gmail.com', 'WORKER');"
+        'test1', '123', 'test1@gmail.com', 'WORKER'),\
+        ('22222222-b392-11ed-92c6-0242ac170004',\
+        'test2', '123', 'test2@gmail.com', 'EMPLOYER'), \
+        ('33333333-b392-11ed-92c6-0242ac170004',\
+        'test3', '123', 'test3@gmail.com', 'ADMIN');"
         )
         mysql.connection.commit()
 
