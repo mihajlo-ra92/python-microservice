@@ -67,7 +67,11 @@ class JobRepo(object):
         return job
 
     def delete_by_id(self, job_id: str) -> bool:
-        pass
+        cur = self.mysql.connection.cursor()
+        cur.execute(f"DELETE FROM Jobs WHERE id='{job_id}';")
+        self.mysql.connection.commit()
+        cur.close()
+        return True
 
 
 def zip_data(cur) -> list[Job]:

@@ -90,39 +90,16 @@ def update_job():
         return retVal.toJSON(), 201
     return json.dumps({"message": str(retVal)}), 401
 
-    # job = request.json
-    # job_id = job["id"]
-    # worker_id = job["workerId"]
-    # job_name = job["jobName"]
-    # job_desc = job["jobDesc"]
-    # pay_in_euro = job["payInEuro"]
-    # completed = job["completed"]
-    # cur = mysql.connection.cursor()
-    # if worker_id == None and completed == 0:
-    #     cur.execute(
-    #         f"UPDATE Jobs \
-    #                 SET job_name = '{job_name}', job_desc = '{job_desc}', \
-    #                 pay_in_euro = {pay_in_euro}, completed = {completed}, \
-    #                 worker_id = '{worker_id}'\
-    #                 WHERE id = '{job_id}';"
-    #     )
-    #     mysql.connection.commit()
-    #     cur.close()
-    #     return json.dumps(job)
-    # message = "Cannot update job where a worker is assigned or a job that \
-    # is completed"
-    # return json.dumps(message)
-
 
 @app.route("/delete-job", methods=["DELETE"])
 def delete_job():
-    job = request.json
-    job_id = job["id"]
-    cur = mysql.connection.cursor()
-    cur.execute(f"DELETE FROM Jobs WHERE id='{job_id}';")
-    mysql.connection.commit()
-    cur.close()
-    return json.dumps(job)
+    # TODO: Implement auth
+    try:
+        job_id = request.json["id"]
+    except Exception as ex:
+        return json.dumps({"message": "Please send id"}), 400
+    deleted: bool = service.delete_by_id(job_id)
+    return json.dumps(deleted), 200
 
 
 if __name__ == "__main__":

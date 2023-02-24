@@ -167,11 +167,29 @@ def test_update_job_valid():
     )
 
     assert req.json() == {
-            "id": "job1",
-            "employer_id": "employer1",
-            "worker_id": "worker1",
-            "job_name": "name1",
-            "job_desc": "desc1",
-            "pay_in_euro": 1.0,
-            "completed": 1,
-        }
+        "id": "job1",
+        "employer_id": "employer1",
+        "worker_id": "worker1",
+        "job_name": "name1",
+        "job_desc": "desc1",
+        "pay_in_euro": 1.0,
+        "completed": 1,
+    }
+
+
+def test_delete_user_valid():
+    req = requests.delete(
+        "http://localhost:5001/delete-job",
+        json={"id": "job1"},
+    )
+    assert req.json() == True
+    assert req.status_code == 200
+
+
+def test_delete_user_invalid():
+    req = requests.delete(
+        "http://localhost:5001/delete-job",
+        json={"id": "invalid"},
+    )
+    assert req.json() == False
+    assert req.status_code == 200

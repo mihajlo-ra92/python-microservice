@@ -45,4 +45,6 @@ class JobService(object):
         return self.repo.update(job)
 
     def delete_by_id(self, job_id: str) -> bool:
+        if self.repo.read_by_id(job_id) == None:
+            return False
         return self.repo.delete_by_id(job_id)
