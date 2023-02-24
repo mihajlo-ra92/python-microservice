@@ -18,18 +18,15 @@ class JobRepo(object):
         job_name, job_desc, pay_in_euro,\
         completed FROM Jobs"
         )
-        # TODO: refactior into zip_data(cur)
-        row_headers = [x[0] for x in cur.description]
-        retVal = cur.fetchall()
-        cur.close()
-        json_data = []
-        for result in retVal:
-            json_data.append(dict(zip(row_headers, result)))
-        jobs: list[Job] = json_data
-        return jobs
+        return zip_data(cur)
 
     def read_by_id(self, job_id) -> Optional[Job]:
-        pass
+        cur = self.mysql.connection.cursor()
+        cur.execute(f"SELECT * FROM Jobs WHERE id='{job_id}';")
+        jobs = zip_data(cur)
+        if len(jobs) > 0:
+            return jobs[0]
+        return None
 
     def read_by_employer_id(self, employer_id) -> list[Job]:
         pass
@@ -45,3 +42,14 @@ class JobRepo(object):
 
     def delete_by_id(self, job_id: str) -> bool:
         pass
+
+
+def zip_data(cur) -> list[Job]:
+    row_headers = [x[0] for x in cur.description]
+    retVal = cur.fetchall()
+    cur.close()
+    json_data = []
+    for result in retVal:
+        json_data.append(dict(zip(row_headers, result)))
+    jobs: list[Job] = json_data
+    return jobs

@@ -70,15 +70,19 @@ def test_read_all():
     ]
 
 
-# def test_login():
-#     req = requests.post(
-#         "http://localhost:5002/login", json={"username": "test1", "password": "123"}
-#     )
-#     pytest.TOKEN = req.json()["Bearer"]
-#     data = jwt.decode(pytest.TOKEN, os.environ.get("SECRET_KEY"), algorithms=["HS256"])
-#     assert data["username"] == "test1" and data["user_type"] == "WORKER"
-
-
 def test_read_by_id_valid():
     req = requests.get("http://localhost:5001/read-by-id", json={"id": "job1"})
-    assert req.json() == "not implemented"
+    assert req.json() == {
+        "id": "job1",
+        "employer_id": "employer1",
+        "worker_id": "worker1",
+        "job_name": "name1",
+        "job_desc": "desc1",
+        "pay_in_euro": 1.0,
+        "completed": 1,
+    }
+
+
+def test_read_by_id_invalid():
+    req = requests.get("http://localhost:5001/read-by-id", json={"id": "invalid"})
+    assert req.json() == {"message": "Invalid job_id"}
