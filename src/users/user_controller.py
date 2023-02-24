@@ -1,9 +1,7 @@
-import json
-import os
+import json, os
 from typing import Optional, Union
 from flask import request
 from user_model import User, UserData
-
 from user_utils import read_user, set_logger_config, set_start, token_required
 
 
@@ -33,10 +31,7 @@ def init_test_db():
 
 @app.route("/read-users", methods=["GET"])
 def read_all():
-    logger.info("!!! DATABASE: !!!")
-    logger.info(app.config["MYSQL_DB"])
     users: list[User] = service.read_all()
-    logger.info(users)
     return json.dumps(users), 200
 
 

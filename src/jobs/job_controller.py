@@ -1,27 +1,45 @@
 import os, uuid, json
-from flask import Flask, request
-from flask_mysqldb import MySQL
+from flask import request
+from job_model import Job
+from typing import Optional, Union
 
-server = Flask(__name__)
+from job_utils import set_logger_config, set_start
 
-server.config["MYSQL_HOST"] = os.environ.get("MYSQL_HOST")
-server.config["MYSQL_USER"] = os.environ.get("MYSQL_USER")
-server.config["MYSQL_PASSWORD"] = os.environ.get("MYSQL_PASSWORD")
-server.config["MYSQL_DB"] = os.environ.get("MYSQL_DB")
-
-mysql = MySQL(server)
+set_logger_config()
+[app, mysql, logger, service] = set_start()
 
 
-@server.route("/read-jobs", methods=["GET"])
+@app.route("/init-test")
+def init_test_db():
+    if os.environ.get("TEST") == "TRUE":
+        cur = mysql.connection.cursor()
+        cur.execute("DELETE FROM Jobs;")
+        cur.execute(
+            "INSERT INTO Jobs (id, employer_id, worker_id,\
+        job_name, job_desc, pay_in_euro, completed)\
+        VALUES ('job1','employer1', 'worker1', 'name1', 'desc1', 1.0, true),\
+        ('job2','employer1', 'worker2', 'name2', 'desc2', 2.0, true);"
+            # VALUES ('job2','employer1', 'worker2', 'name2', 'desc2', 2.0, false),\
+            # VALUES ('job3','employer2', 'worker1', 'name3', 'desc3', 3.0, true),\
+            # VALUES ('job4','employer2', NULL, 'name4', 'desc4', 4.0, false);"
+        )
+        mysql.connection.commit()
+        cur.close()
+    return ""
+
+
+@app.route("/read-jobs", methods=["GET"])
 def read_jobs():
-    cur = mysql.connection.cursor()
-    cur.execute(f"SELECT * FROM Jobs")
-    jobs = cur.fetchall()
-    cur.close()
-    return json.dumps(jobs)
+    jobs: list[Job] = service.read_all()
+    return json.dumps(jobs), 200
+    # cur = mysql.connection.cursor()
+    # cur.execute(f"SELECT * FROM Jobs")
+    # jobs = cur.fetchall()
+    # cur.close()
+    # return json.dumps(jobs)
 
 
-@server.route("/read-job", methods=["GET"])
+@app.route("/read-job", methods=["GET"])
 def read_job():
     sent_job = request.json
     job_id = sent_job["id"]
@@ -32,7 +50,7 @@ def read_job():
     return json.dumps(read_job)
 
 
-@server.route("/create-job", methods=["POST"])
+@app.route("/create-job", methods=["POST"])
 def create_job():
     job = request.json
     empoloyer_id = job["employerId"]
@@ -53,7 +71,7 @@ def create_job():
     return json.dumps(job)
 
 
-@server.route("/update-job", methods=["PUT"])
+@app.route("/update-job", methods=["PUT"])
 def update_job():
     job = request.json
     job_id = job["id"]
@@ -79,7 +97,7 @@ def update_job():
     return json.dumps(message)
 
 
-@server.route("/delete-job", methods=["DELETE"])
+@app.route("/delete-job", methods=["DELETE"])
 def delete_job():
     job = request.json
     job_id = job["id"]
@@ -91,4 +109,4 @@ def delete_job():
 
 
 if __name__ == "__main__":
-    server.run(host="0.0.0.0", port=5000)
+    app.run(host="0.0.0.0", port=5000)

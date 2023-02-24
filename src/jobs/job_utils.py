@@ -5,6 +5,8 @@ from logging.config import dictConfig
 from flask import Flask, request
 from flask_mysqldb import MySQL
 
+from job_service import JobService
+
 SECRET_KEY = os.environ.get("SECRET_KEY")
 
 
@@ -20,9 +22,30 @@ def init_app() -> Flask:
     return app
 
 
-def set_start() -> tuple[Flask, MySQL, Logger, JobsService]:
+def set_start() -> tuple[Flask, MySQL, Logger, JobService]:
     app: Flask = init_app()
     mysql = MySQL(app)
     logger = app.logger
-    service = UserService(mysql, logger)
+    service = JobService(mysql, logger)
     return [app, mysql, logger, service]
+
+
+def set_logger_config():
+    dictConfig(
+        {
+            "version": 1,
+            "formatters": {
+                "default": {
+                    "format": "[%(asctime)s] %(levelname)s in %(module)s: %(message)s",
+                }
+            },
+            "handlers": {
+                "wsgi": {
+                    "class": "logging.StreamHandler",
+                    "stream": "ext://flask.logging.wsgi_errors_stream",
+                    "formatter": "default",
+                }
+            },
+            "root": {"level": "INFO", "handlers": ["wsgi"]},
+        }
+    )

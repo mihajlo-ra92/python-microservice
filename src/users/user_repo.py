@@ -11,7 +11,6 @@ class UserRepo(object):
         self.logger = logger
 
     def read_all(self) -> list[User]:
-        self.logger.info("!!! FROM REPO !!!")
         cur = self.mysql.connection.cursor()
         cur.execute(f"SELECT id, username, email, user_type FROM Users")
         row_headers = [x[0] for x in cur.description]

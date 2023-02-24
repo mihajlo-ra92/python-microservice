@@ -15,7 +15,7 @@ def test_env():
     assert os.environ.get("TEST") == "TRUE"
 
 
-def test_init():
+def test_read_all():
     req = requests.get("http://localhost:5001/init-test")
 
     req = requests.get(
@@ -23,9 +23,21 @@ def test_init():
     )
     assert req.json() == [
         {
-            "id": "43299a1e-b392-11ed-92c6-0242ac170004",
-            "username": "test1",
-            "email": "test1@gmail.com",
-            "user_type": "WORKER",
-        }
+            "id": "job1",
+            "employer_id": "employer1",
+            "worker_id": "worker1",
+            "job_name": "name1",
+            "job_desc": "desc1",
+            "pay_in_euro": 1.0,
+            "completed": 1,
+        },
+        {
+            "id": "job2",
+            "employer_id": "employer1",
+            "worker_id": "worker2",
+            "job_name": "name2",
+            "job_desc": "desc2",
+            "pay_in_euro": 2.0,
+            "completed": 1,
+        },
     ]

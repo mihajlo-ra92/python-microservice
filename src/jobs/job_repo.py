@@ -12,7 +12,21 @@ class JobRepo(object):
         self.logger = logger
 
     def read_all(self) -> list[Job]:
-        pass
+        cur = self.mysql.connection.cursor()
+        cur.execute(
+            f"SELECT id, employer_id, worker_id,\
+        job_name, job_desc, pay_in_euro,\
+        completed FROM Jobs"
+        )
+        # TODO: refactior into zip_data(cur)
+        row_headers = [x[0] for x in cur.description]
+        retVal = cur.fetchall()
+        cur.close()
+        json_data = []
+        for result in retVal:
+            json_data.append(dict(zip(row_headers, result)))
+        jobs: list[Job] = json_data
+        return jobs
 
     def read_by_id(self, job_id) -> Optional[Job]:
         pass

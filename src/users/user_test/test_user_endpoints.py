@@ -15,7 +15,7 @@ def test_env():
     assert os.environ.get("TEST") == "TRUE"
 
 
-def test_init():
+def test_read_all():
     req = requests.get("http://localhost:5000/init-test")
 
     req = requests.get(
