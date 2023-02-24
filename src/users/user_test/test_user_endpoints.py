@@ -72,7 +72,7 @@ def test_invalid_token():
     assert req.status_code == 401
 
 
-def test_by_logged_user_valid():
+def test_read_by_logged_user_valid():
     print("TOKEN")
     print(pytest.TOKEN)
     req = requests.get(

@@ -38,6 +38,47 @@ def test_read_all():
             "job_name": "name2",
             "job_desc": "desc2",
             "pay_in_euro": 2.0,
+            "completed": 0,
+        },
+        {
+            "id": "job3",
+            "employer_id": "employer2",
+            "worker_id": "worker1",
+            "job_name": "name3",
+            "job_desc": "desc3",
+            "pay_in_euro": 3.0,
             "completed": 1,
         },
+        {
+            "id": "job4",
+            "employer_id": "employer2",
+            "worker_id": "worker2",
+            "job_name": "name4",
+            "job_desc": "desc4",
+            "pay_in_euro": 4.0,
+            "completed": 1,
+        },
+        {
+            "id": "job5",
+            "employer_id": "employer1",
+            "worker_id": None,
+            "job_name": "name5",
+            "job_desc": "desc5",
+            "pay_in_euro": 5.0,
+            "completed": 0,
+        },
     ]
+
+
+# def test_login():
+#     req = requests.post(
+#         "http://localhost:5002/login", json={"username": "test1", "password": "123"}
+#     )
+#     pytest.TOKEN = req.json()["Bearer"]
+#     data = jwt.decode(pytest.TOKEN, os.environ.get("SECRET_KEY"), algorithms=["HS256"])
+#     assert data["username"] == "test1" and data["user_type"] == "WORKER"
+
+
+def test_read_by_id_valid():
+    req = requests.get("http://localhost:5001/read-by-id", json={"id": "job1"})
+    assert req.json() == "not implemented"

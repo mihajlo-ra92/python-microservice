@@ -18,10 +18,10 @@ def init_test_db():
             "INSERT INTO Jobs (id, employer_id, worker_id,\
         job_name, job_desc, pay_in_euro, completed)\
         VALUES ('job1','employer1', 'worker1', 'name1', 'desc1', 1.0, true),\
-        ('job2','employer1', 'worker2', 'name2', 'desc2', 2.0, true);"
-            # VALUES ('job2','employer1', 'worker2', 'name2', 'desc2', 2.0, false),\
-            # VALUES ('job3','employer2', 'worker1', 'name3', 'desc3', 3.0, true),\
-            # VALUES ('job4','employer2', NULL, 'name4', 'desc4', 4.0, false);"
+        ('job2','employer1', 'worker2', 'name2', 'desc2', 2.0, false),\
+        ('job3','employer2', 'worker1', 'name3', 'desc3', 3.0, true),\
+        ('job4','employer2', 'worker2', 'name4', 'desc4', 4.0, true),\
+        ('job5','employer1', NULL, 'name5', 'desc5', 5.0, false);"
         )
         mysql.connection.commit()
         cur.close()
@@ -32,22 +32,26 @@ def init_test_db():
 def read_jobs():
     jobs: list[Job] = service.read_all()
     return json.dumps(jobs), 200
-    # cur = mysql.connection.cursor()
-    # cur.execute(f"SELECT * FROM Jobs")
-    # jobs = cur.fetchall()
-    # cur.close()
-    # return json.dumps(jobs)
 
 
-@app.route("/read-job", methods=["GET"])
+@app.route("/read-by-id", methods=["GET"])
 def read_job():
     sent_job = request.json
-    job_id = sent_job["id"]
-    cur = mysql.connection.cursor()
-    cur.execute(f"SELECT * FROM Jobs WHERE id='{job_id}';")
-    read_job = cur.fetchall()
-    cur.close()
-    return json.dumps(read_job)
+    try:
+        job_id = sent_job["id"]
+    except Exception as ex:
+        logger.info(ex)
+        return json.dumps({"message": "Please send id"}), 400
+    job: Optional[Job] = service.read_by_id(job_id)
+    if job == None:
+        return json.dumps({"message": "Invalid job_id"})
+    return json.dumps(job), 200
+    # job_id = sent_job["id"]
+    # cur = mysql.connection.cursor()
+    # cur.execute(f"SELECT * FROM Jobs WHERE id='{job_id}';")
+    # read_job = cur.fetchall()
+    # cur.close()
+    # return json.dumps(read_job)
 
 
 @app.route("/create-job", methods=["POST"])

@@ -13,14 +13,15 @@ class UserRepo(object):
     def read_all(self) -> list[User]:
         cur = self.mysql.connection.cursor()
         cur.execute(f"SELECT id, username, email, user_type FROM Users")
-        row_headers = [x[0] for x in cur.description]
-        retVal = cur.fetchall()
-        cur.close()
-        json_data = []
-        for result in retVal:
-            json_data.append(dict(zip(row_headers, result)))
-        users: list[User] = json_data
-        return users
+        return zip_data(cur)
+        # row_headers = [x[0] for x in cur.description]
+        # retVal = cur.fetchall()
+        # cur.close()
+        # json_data = []
+        # for result in retVal:
+        #     json_data.append(dict(zip(row_headers, result)))
+        # users: list[User] = json_data
+        # return users
 
     def read_by_id(self, user_id) -> Optional[User]:
         cur = self.mysql.connection.cursor()
@@ -84,3 +85,14 @@ class UserRepo(object):
         self.mysql.connection.commit()
         cur.close()
         return True
+
+
+def zip_data(cur) -> list[User]:
+    row_headers = [x[0] for x in cur.description]
+    retVal = cur.fetchall()
+    cur.close()
+    json_data = []
+    for result in retVal:
+        json_data.append(dict(zip(row_headers, result)))
+    users: list[User] = json_data
+    return users
