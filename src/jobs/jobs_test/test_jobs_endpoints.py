@@ -16,10 +16,10 @@ def test_env():
 
 
 def test_init():
-    req = requests.get("http://localhost:5000/init-test")
+    req = requests.get("http://localhost:5001/init-test")
 
     req = requests.get(
-        "http://localhost:5000/read-users", json={}, headers={"abs": "sd"}
+        "http://localhost:5001/read-jobs", json={}, headers={"abs": "sd"}
     )
     assert req.json() == [
         {

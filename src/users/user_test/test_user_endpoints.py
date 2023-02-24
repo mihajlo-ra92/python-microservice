@@ -16,28 +16,6 @@ def test_env():
 
 
 def test_init():
-    # req = requests.post(
-    #     "http://localhost:5002/login", json={"username": "test1", "password": "123"}
-    # )
-    # pytest.TOKEN = req.json()["Bearer"]
-    # db = mysql.connector.connect(
-    #     host="localhost", user="root", passwd="password", database="users_db_test"
-    # )
-    # cur = db.cursor()
-    # cur.execute("DROP TABLE IF EXISTS Users;")
-    # cur.execute(
-    #     "CREATE TABLE Users (id VARCHAR(255) PRIMARY KEY, \
-    # username VARCHAR(30) NOT NULL UNIQUE,\
-    # password VARCHAR(30) NOT NULL, email VARCHAR(50)\
-    # NOT NULL UNIQUE, user_type ENUM ('WORKER', 'EMPLOYER', 'ADMIN')\
-    # NOT NULL);"
-    # )
-    # cur.execute(
-    #     "INSERT INTO Users (id, username, password, email, \
-    # user_type) VALUES ('43299a1e-b392-11ed-92c6-0242ac170004',\
-    # 'test1', '123', 'test1@gmail.com', 'WORKER');"
-    # )
-    # db.commit()
     req = requests.get("http://localhost:5000/init-test")
 
     req = requests.get(

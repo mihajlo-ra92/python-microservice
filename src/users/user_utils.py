@@ -1,13 +1,9 @@
 from functools import wraps
-import json
+import json, os, jwt
 from logging import Logger
 from logging.config import dictConfig
-import os
-
 from flask import Flask, request
 from flask_mysqldb import MySQL
-import jwt
-
 from user_model import User, UserData
 from user_service import UserService
 

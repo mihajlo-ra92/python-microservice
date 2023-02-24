@@ -15,16 +15,6 @@ set_logger_config()
 def init_test_db():
     if os.environ.get("TEST") == "TRUE":
         cur = mysql.connection.cursor()
-        # cur.execute("DROP TABLE IF EXISTS User;")
-        # cur.execute(
-        #     "CREATE TABLE Users (id VARCHAR(255) PRIMARY KEY, \
-        # username VARCHAR(30) NOT NULL UNIQUE,\
-        # password VARCHAR(30) NOT NULL, email VARCHAR(50)\
-        # NOT NULL UNIQUE, user_type ENUM ('WORKER', 'EMPLOYER', 'ADMIN')\
-        # NOT NULL);"
-        # )
-        logger.info("IN INIT !!! !!! !!!")
-        logger.info(service.read_all())
         cur.execute("DELETE FROM Users;")
         cur.execute(
             "INSERT INTO Users (id, username, password, email, \
@@ -38,7 +28,6 @@ def init_test_db():
         mysql.connection.commit()
 
         cur.close()
-        logger.info(service.read_all())
     return ""
 
 
