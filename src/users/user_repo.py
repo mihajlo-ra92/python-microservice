@@ -1,5 +1,5 @@
 import json, uuid
-from typing import Optional
+from typing import Optional, Union
 from logging import Logger
 from flask_mysqldb import MySQL
 from user_model import User
@@ -53,14 +53,18 @@ class UserRepo(object):
             return users[0]
         return None
 
-    def create(self, user: User) -> User:
+    def create(self, user: User) -> Union[Exception, User]:
         # TODO: handle taken unique field
         user.id = str(uuid.uuid1())
         cur = self.mysql.connection.cursor()
-        cur.execute(
-            f"INSERT INTO Users(id, username, password, email, user_type) VALUES \
-            ('{user.id}', '{user.username}', '{user.password}', '{user.email}', '{user.user_type}');"
-        )
+        try:
+            cur.execute(
+                f"INSERT INTO Users(id, username, password, email, user_type) VALUES \
+                ('{user.id}', '{user.username}', '{user.password}', '{user.email}', '{user.user_type}');"
+            )
+        except Exception as ex:
+            self.logger.info(ex)
+            return ex
         self.mysql.connection.commit()
         cur.close()
         return user
@@ -69,8 +73,8 @@ class UserRepo(object):
         cur = self.mysql.connection.cursor()
         cur.execute(
             f"UPDATE  Users \
-                    SET username = '{user['username']}', password = '{user['password']}', email = '{user['email']}' \
-                    WHERE id = '{user['id']}';"
+                    SET username = '{user.username}', password = '{user.password}', email = '{user.email}' \
+                    WHERE id = '{user.id}';"
         )
         self.mysql.connection.commit()
         cur.close()

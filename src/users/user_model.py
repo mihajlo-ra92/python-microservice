@@ -33,3 +33,7 @@ class User(object):
 class UserData:
     username: str
     user_type: str
+
+
+class MyException(Exception):
+    pass

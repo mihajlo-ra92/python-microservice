@@ -2,7 +2,7 @@ from logging import Logger
 from typing import Optional, Union
 from user_repo import UserRepo
 from flask_mysqldb import MySQL
-from user_model import User
+from user_model import MyException, User, UserData
 
 
 class UserService(object):
@@ -11,7 +11,6 @@ class UserService(object):
         self.repo = UserRepo(mysql, logger)
 
     def read_all(self) -> list[User]:
-        self.logger.info("!!! FROM SERVICE !!!")
         return self.repo.read_all()
 
     def read_by_id(self, user_id: str) -> Optional[User]:
@@ -30,13 +29,25 @@ class UserService(object):
         read_user = self.repo.read_by_username(username)
         return read_user
 
-    def create(self, user: User) -> User:
+    def create(self, user: User) -> Union[Exception, User]:
         return self.repo.create(user)
 
-    def update(self, user: User) -> User:
-        return self.repo.update(user)
+    def update(self, user: User, logged_user: UserData) -> Union[Exception, User]:
+        user_to_be_changed = self.repo.read_by_id(user.id)
+        self.logger.info("USER TO BE CHANGED!!!!")
+        self.logger.info(user_to_be_changed)
+        if user_to_be_changed == None:
+            return MyException("No user with such id")
+        if (
+            user_to_be_changed["username"] == logged_user.username
+            or logged_user.user_type == "ADMIN"
+        ):
+            return self.repo.update(user)
+        return MyException("Only admin can update other users")
 
     def delete_by_id(self, user_id) -> bool:
+        if self.repo.read_by_id(user_id) == None:
+            return False
         return self.repo.delete_by_id(user_id)
 
     def check_info(self, username, password) -> Union[str, tuple[str, str]]:

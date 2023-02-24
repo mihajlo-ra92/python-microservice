@@ -76,10 +76,14 @@ def set_logger_config():
     )
 
 
-def read_user(json) -> User:
+def read_user(json: any) -> User:
     user = User()
     user.username = json["username"]
     user.email = json["email"]
     user.password = json["password"]
     user.user_type = json["user_type"]
+    try:
+        user.id = json["id"]
+    except Exception:
+        user.id = ""
     return user

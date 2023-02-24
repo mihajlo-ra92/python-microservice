@@ -1,5 +1,6 @@
 import requests, os, jwt, pytest
 from dotenv import load_dotenv
+import mysql.connector
 
 
 project_folder = os.path.expanduser("../")  # adjust as appropriate thats my directory
@@ -10,7 +11,36 @@ def pytest_configure():
     pytest.TOKEN = ""
 
 
+def test_env():
+    assert os.environ.get("SECRET_KEY") is not None
+    assert os.environ.get("TEST") == "TRUE"
+
+
 def test_init():
+    # req = requests.post(
+    #     "http://localhost:5002/login", json={"username": "test1", "password": "123"}
+    # )
+    # pytest.TOKEN = req.json()["Bearer"]
+    # db = mysql.connector.connect(
+    #     host="localhost", user="root", passwd="password", database="users_db_test"
+    # )
+    # cur = db.cursor()
+    # cur.execute("DROP TABLE IF EXISTS Users;")
+    # cur.execute(
+    #     "CREATE TABLE Users (id VARCHAR(255) PRIMARY KEY, \
+    # username VARCHAR(30) NOT NULL UNIQUE,\
+    # password VARCHAR(30) NOT NULL, email VARCHAR(50)\
+    # NOT NULL UNIQUE, user_type ENUM ('WORKER', 'EMPLOYER', 'ADMIN')\
+    # NOT NULL);"
+    # )
+    # cur.execute(
+    #     "INSERT INTO Users (id, username, password, email, \
+    # user_type) VALUES ('43299a1e-b392-11ed-92c6-0242ac170004',\
+    # 'test1', '123', 'test1@gmail.com', 'WORKER');"
+    # )
+    # db.commit()
+    req = requests.get("http://localhost:5000/init-test")
+
     req = requests.get(
         "http://localhost:5000/read-users", json={}, headers={"abs": "sd"}
     )
@@ -24,11 +54,7 @@ def test_init():
     ]
 
 
-def test_env():
-    assert os.environ.get("SECRET_KEY") is not None
-    assert os.environ.get("TEST") == "TRUE"
-
-
+# TODO: Move into auth tests
 def test_login():
     req = requests.post(
         "http://localhost:5002/login", json={"username": "test1", "password": "123"}
@@ -43,6 +69,7 @@ def test_no_token():
         "http://localhost:5000/read-logged-user", json={"username": "test1"}
     )
     assert req.json() == {"message": "Token is missing"}
+    assert req.status_code == 401
 
 
 def test_invalid_token():
@@ -74,12 +101,9 @@ def test_by_logged_user_valid():
 
 
 def test_read_by_username_valid():
-    print("TOKEN")
-    print(pytest.TOKEN)
     req = requests.get(
         "http://localhost:5000/read-by-username",
         json={"username": "test1"},
-        headers={"Bearer": pytest.TOKEN},
     )
     assert req.json() == {
         "id": "43299a1e-b392-11ed-92c6-0242ac170004",
@@ -100,3 +124,110 @@ def test_read_by_username_invalid():
     )
     assert req.json() == {"message": "Invalid username"}
     assert req.status_code == 400
+
+
+def test_read_by_id_valid():
+    req = requests.get(
+        "http://localhost:5000/read-by-id",
+        json={"id": "43299a1e-b392-11ed-92c6-0242ac170004"},
+    )
+    assert req.json() == {
+        "id": "43299a1e-b392-11ed-92c6-0242ac170004",
+        "username": "test1",
+        "password": None,
+        "email": "test1@gmail.com",
+        "user_type": "WORKER",
+    }
+
+    assert req.status_code == 200
+
+
+def test_read_by_id_invalid():
+    req = requests.get("http://localhost:5000/read-by-id", json={"id": "invalid"})
+    assert req.json() == {"message": "Invalid user_id"}
+
+    assert req.status_code == 400
+
+
+def test_create_user_valid():
+    req = requests.post(
+        "http://localhost:5000/create-user",
+        json={
+            "username": "test2",
+            "password": "123",
+            "email": "test2@gmail.com",
+            "user_type": "WORKER",
+        },
+    )
+    assert req.json()["username"] == "test2"
+    assert req.status_code == 201
+
+
+def test_create_user_taken_username():
+    req = requests.post(
+        "http://localhost:5000/create-user",
+        json={
+            "username": "test2",
+            "password": "123",
+            "email": "not_taken@gmail.com",
+            "user_type": "WORKER",
+        },
+    )
+    assert "Duplicate entry 'test2' for key 'username'" in req.json()["message"]
+    assert req.status_code == 400
+
+
+def test_create_user_taken_email():
+    req = requests.post(
+        "http://localhost:5000/create-user",
+        json={
+            "username": "not taken",
+            "password": "123",
+            "email": "test1@gmail.com",
+            "user_type": "WORKER",
+        },
+    )
+    assert "Duplicate entry 'test1@gmail.com' for key 'email'" in req.json()["message"]
+    assert req.status_code == 400
+
+
+def test_update_user_valid():
+    req = requests.put(
+        "http://localhost:5000/update-user",
+        json={
+            "email": "test1@gmail.com",
+            "id": "43299a1e-b392-11ed-92c6-0242ac170004",
+            "password": "123_update",
+            "user_type": "WORKER",
+            "username": "test1",
+        },
+        headers={"Bearer": pytest.TOKEN},  # logged as test1 user
+    )
+    assert req.json() == {
+        "email": "test1@gmail.com",
+        "id": "43299a1e-b392-11ed-92c6-0242ac170004",
+        "password": "123_update",
+        "user_type": "WORKER",
+        "username": "test1",
+    }
+    assert req.status_code == 201
+
+
+def test_delete_user_valid():
+    req = requests.delete(
+        "http://localhost:5000/delete-user",
+        json={"id": "43299a1e-b392-11ed-92c6-0242ac170004"},
+        headers={"Bearer": pytest.TOKEN},
+    )
+    assert req.json() == True
+    assert req.status_code == 200
+
+
+def test_delete_user_invalid():
+    req = requests.delete(
+        "http://localhost:5000/delete-user",
+        json={"id": "invalid"},
+        headers={"Bearer": pytest.TOKEN},
+    )
+    assert req.json() == False
+    assert req.status_code == 200

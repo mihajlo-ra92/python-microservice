@@ -4,11 +4,38 @@ from typing import Optional, Union
 from flask import request
 from user_model import User, UserData
 
-from user_utils import read_jwt, read_user, set_logger_config, set_start, token_required
+from user_utils import read_user, set_logger_config, set_start, token_required
 
 
 set_logger_config()
 [app, mysql, logger, service] = set_start()
+
+
+@app.route("/init-test")
+def init_test_db():
+    if os.environ.get("TEST") == "TRUE":
+        cur = mysql.connection.cursor()
+        # cur.execute("DROP TABLE IF EXISTS User;")
+        # cur.execute(
+        #     "CREATE TABLE Users (id VARCHAR(255) PRIMARY KEY, \
+        # username VARCHAR(30) NOT NULL UNIQUE,\
+        # password VARCHAR(30) NOT NULL, email VARCHAR(50)\
+        # NOT NULL UNIQUE, user_type ENUM ('WORKER', 'EMPLOYER', 'ADMIN')\
+        # NOT NULL);"
+        # )
+        logger.info("IN INIT !!! !!! !!!")
+        logger.info(service.read_all())
+        cur.execute("DELETE FROM Users;")
+        cur.execute(
+            "INSERT INTO Users (id, username, password, email, \
+        user_type) VALUES ('43299a1e-b392-11ed-92c6-0242ac170004',\
+        'test1', '123', 'test1@gmail.com', 'WORKER');"
+        )
+        mysql.connection.commit()
+
+        cur.close()
+        logger.info(service.read_all())
+    return ""
 
 
 @app.route("/read-users", methods=["GET"])
@@ -16,6 +43,7 @@ def read_all():
     logger.info("!!! DATABASE: !!!")
     logger.info(app.config["MYSQL_DB"])
     users: list[User] = service.read_all()
+    logger.info(users)
     return json.dumps(users), 200
 
 
@@ -65,30 +93,34 @@ def create():
     except Exception as inst:
         logger.info(inst)
         return json.dumps({"message": "Please send all user data"}), 400
-    created_user: User = service.create(sent_user)
-    return created_user.toJSON(), 201
+    retVal: Union[Exception, User] = service.create(sent_user)
+    if isinstance(retVal, User):
+        return retVal.toJSON(), 201
+    return json.dumps({"message": str(retVal)}), 400
 
 
 @app.route("/update-user", methods=["PUT"])
 @token_required
-def update():
-    # TODO: Check if logged in user is the one being updated
+def update(logged_user: UserData):
+    logger.info(f"Logged user: {logged_user}")
     try:
         sent_user: User = read_user(request.json)
-        sent_user.id = request.json["id"]
     except Exception as inst:
         logger.info(inst)
         return json.dumps({"message": "Please send all user data"}), 400
-    updated_user: User = service.update(sent_user)
-    return updated_user, 200
+    retVal: Union[Exception, User] = service.update(sent_user, logged_user)
+    if isinstance(retVal, User):
+        return retVal.toJSON(), 201
+    return json.dumps({"message": str(retVal)}), 401
 
 
 @app.route("/delete-user", methods=["DELETE"])
 @token_required
 def delete(user_data):
+    # TODO: check jwt, user must be admin ar ids must match
     # TODO: check request.json for id, if invalid send bad request
-    sent_user: User = request.json
-    deleted: bool = service.delete_by_id(sent_user["id"])
+    # sent_user: User = request.json
+    deleted: bool = service.delete_by_id(request.json["id"])
     return json.dumps(deleted), 200
 
 
