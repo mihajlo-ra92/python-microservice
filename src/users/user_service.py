@@ -34,8 +34,6 @@ class UserService(object):
 
     def update(self, user: User, logged_user: UserData) -> Union[Exception, User]:
         user_to_be_changed: User = self.repo.read_by_id(user.id)
-        self.logger.info("USER TO BE CHANGED!!!!")
-        self.logger.info(user_to_be_changed)
         if user_to_be_changed == None:
             return MyException("No user with such id")
         if (

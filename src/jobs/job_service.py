@@ -37,6 +37,11 @@ class JobService(object):
         return self.repo.create(job)
 
     def update(self, job: Job) -> Union[Exception, Job]:
+        self.logger.info(f"sent job: {job.toJSON()}")
+        job_to_be_changed: Job = self.repo.read_by_id(job.id)
+        self.logger.info(f"job to change: {job_to_be_changed}")
+        if job_to_be_changed == None:
+            return MyException("No job with such id")
         return self.repo.update(job)
 
     def delete_by_id(self, job_id: str) -> bool:

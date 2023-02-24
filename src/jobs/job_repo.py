@@ -54,7 +54,17 @@ class JobRepo(object):
         return job
 
     def update(self, job: Job) -> Job:
-        pass
+        cur = self.mysql.connection.cursor()
+        cur.execute(
+            f"UPDATE Jobs\
+            SET employer_id='{job.employer_id}',worker_id='{job.worker_id}',\
+            job_name='{job.job_name}',job_desc='{job.job_desc}',\
+            pay_in_euro={job.pay_in_euro},completed={job.completed}\
+            WHERE id='{job.id}';"
+        )
+        self.mysql.connection.commit()
+        cur.close()
+        return job
 
     def delete_by_id(self, job_id: str) -> bool:
         pass

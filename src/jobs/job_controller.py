@@ -80,28 +80,38 @@ def create_job():
 
 @app.route("/update-job", methods=["PUT"])
 def update_job():
-    job = request.json
-    job_id = job["id"]
-    worker_id = job["workerId"]
-    job_name = job["jobName"]
-    job_desc = job["jobDesc"]
-    pay_in_euro = job["payInEuro"]
-    completed = job["completed"]
-    cur = mysql.connection.cursor()
-    if worker_id == None and completed == 0:
-        cur.execute(
-            f"UPDATE Jobs \
-                    SET job_name = '{job_name}', job_desc = '{job_desc}', \
-                    pay_in_euro = {pay_in_euro}, completed = {completed}, \
-                    worker_id = '{worker_id}'\
-                    WHERE id = '{job_id}';"
-        )
-        mysql.connection.commit()
-        cur.close()
-        return json.dumps(job)
-    message = "Cannot update job where a worker is assigned or a job that \
-    is completed"
-    return json.dumps(message)
+    try:
+        sent_job: Job = read_job(request.json)
+    except Exception as ex:
+        logger.info(ex)
+        return json.dumps({"message": "Please send all user data"}), 400
+    retVal: Union[Exception, Job] = service.update(sent_job)
+    if isinstance(retVal, Job):
+        return retVal.toJSON(), 201
+    return json.dumps({"message": str(retVal)}), 401
+
+    # job = request.json
+    # job_id = job["id"]
+    # worker_id = job["workerId"]
+    # job_name = job["jobName"]
+    # job_desc = job["jobDesc"]
+    # pay_in_euro = job["payInEuro"]
+    # completed = job["completed"]
+    # cur = mysql.connection.cursor()
+    # if worker_id == None and completed == 0:
+    #     cur.execute(
+    #         f"UPDATE Jobs \
+    #                 SET job_name = '{job_name}', job_desc = '{job_desc}', \
+    #                 pay_in_euro = {pay_in_euro}, completed = {completed}, \
+    #                 worker_id = '{worker_id}'\
+    #                 WHERE id = '{job_id}';"
+    #     )
+    #     mysql.connection.commit()
+    #     cur.close()
+    #     return json.dumps(job)
+    # message = "Cannot update job where a worker is assigned or a job that \
+    # is completed"
+    # return json.dumps(message)
 
 
 @app.route("/delete-job", methods=["DELETE"])

@@ -150,3 +150,28 @@ def test_create_job_invalid_employer_id():
         },
     )
     assert req.json()["message"] == "Sent employer_id not valid"
+
+
+def test_update_job_valid():
+    req = requests.put(
+        "http://localhost:5001/update-job",
+        json={
+            "id": "job1",
+            "employer_id": "employer1",
+            "worker_id": "worker1",
+            "job_name": "name1",
+            "job_desc": "desc1",
+            "pay_in_euro": 1.0,
+            "completed": 1,
+        },
+    )
+
+    assert req.json() == {
+            "id": "job1",
+            "employer_id": "employer1",
+            "worker_id": "worker1",
+            "job_name": "name1",
+            "job_desc": "desc1",
+            "pay_in_euro": 1.0,
+            "completed": 1,
+        }
