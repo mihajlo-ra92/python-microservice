@@ -35,7 +35,23 @@ class JobRepo(object):
         pass
 
     def create(self, job: Job) -> Union[Exception, Job]:
-        pass
+        job.id = str(uuid.uuid1())
+        cur = self.mysql.connection.cursor()
+        try:
+            cur.execute(
+                f"INSERT INTO Jobs(id, employer_id, worker_id, job_name, \
+        job_desc, pay_in_euro, completed) VALUES('{str(uuid.uuid1())}', \
+        '{job.employer_id}', NULL, '{job.job_name}', '{job.job_desc}', \
+        '{job.pay_in_euro}', false);"
+            )
+        except Exception as ex:
+            self.logger.info(ex)
+            return ex
+        self.mysql.connection.commit()
+        cur.close()
+        job.worker_id = None
+        job.completed = False
+        return job
 
     def update(self, job: Job) -> Job:
         pass

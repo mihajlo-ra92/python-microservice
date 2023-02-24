@@ -86,3 +86,35 @@ def test_read_by_id_valid():
 def test_read_by_id_invalid():
     req = requests.get("http://localhost:5001/read-by-id", json={"id": "invalid"})
     assert req.json() == {"message": "Invalid job_id"}
+
+
+def test_create_job_valid():
+    req = requests.post(
+        "http://localhost:5001/create-job",
+        json={
+            "id": "job6",
+            "employer_id": "employer1",
+            "worker_id": "worker1",
+            "job_name": "name1",
+            "job_desc": "desc1",
+            "pay_in_euro": 1.0,
+            "completed": 0,
+        },
+    )
+    assert req.json()["employer_id"] == "employer1"
+
+
+def test_create_job_invalid():
+    req = requests.post(
+        "http://localhost:5001/create-job",
+        json={
+            "id": "job6",
+            "employer_id": "employer1",
+            # "worker_id" :"worker1,"
+            "job_name": "name1",
+            "job_desc": "desc1",
+            "pay_in_euro": 1.0,
+            "completed": 0,
+        },
+    )
+    assert req.json()["message"] == "Please send all job data"

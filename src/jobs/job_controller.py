@@ -3,7 +3,7 @@ from flask import request
 from job_model import Job
 from typing import Optional, Union
 
-from job_utils import set_logger_config, set_start
+from job_utils import read_job, set_logger_config, set_start
 
 set_logger_config()
 [app, mysql, logger, service] = set_start()
@@ -35,7 +35,7 @@ def read_jobs():
 
 
 @app.route("/read-by-id", methods=["GET"])
-def read_job():
+def read_by_id():
     sent_job = request.json
     try:
         job_id = sent_job["id"]
@@ -46,33 +46,20 @@ def read_job():
     if job == None:
         return json.dumps({"message": "Invalid job_id"})
     return json.dumps(job), 200
-    # job_id = sent_job["id"]
-    # cur = mysql.connection.cursor()
-    # cur.execute(f"SELECT * FROM Jobs WHERE id='{job_id}';")
-    # read_job = cur.fetchall()
-    # cur.close()
-    # return json.dumps(read_job)
 
 
 @app.route("/create-job", methods=["POST"])
 def create_job():
-    job = request.json
-    empoloyer_id = job["employerId"]
-    job_name = job["jobName"]
-    job_desc = job["jobDesc"]
-    pay_in_euro = job["payInEuro"]
-    completed = job["completed"]
-
-    cur = mysql.connection.cursor()
-    cur.execute(
-        f"INSERT INTO Jobs(id, employer_id, worker_id, job_name, \
-        job_desc, pay_in_euro, completed) VALUES('{str(uuid.uuid1())}', \
-        '{empoloyer_id}', NULL, '{job_name}', '{job_desc}', \
-        '{pay_in_euro}', {completed});"
-    )
-    mysql.connection.commit()
-    cur.close()
-    return json.dumps(job)
+    # TODO: Check if employer_id is vaild
+    try:
+        sent_job: Job = read_job(request.json)
+    except Exception as ex:
+        logger.info(ex)
+        return json.dumps({"message": "Please send all job data"}), 400
+    retVal: Union[Exception, Job] = service.create(sent_job)
+    if isinstance(retVal, Job):
+        return retVal.toJSON(), 201
+    return json.dumps({"message": str(retVal)}), 400
 
 
 @app.route("/update-job", methods=["PUT"])

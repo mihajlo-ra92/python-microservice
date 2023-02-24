@@ -24,6 +24,8 @@ class JobService(object):
         return self.repo.read_by_worker_id(worker_id)
 
     def create(self, job: Job) -> Union[Exception, Job]:
+        # TODO: Check if employer_id is valid
+        # send http to users service to check
         return self.repo.create(job)
 
     def update(self, job: Job) -> Union[Exception, Job]:

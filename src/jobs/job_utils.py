@@ -6,6 +6,7 @@ from flask import Flask, request
 from flask_mysqldb import MySQL
 
 from job_service import JobService
+from job_model import Job
 
 SECRET_KEY = os.environ.get("SECRET_KEY")
 
@@ -49,3 +50,18 @@ def set_logger_config():
             "root": {"level": "INFO", "handlers": ["wsgi"]},
         }
     )
+
+
+def read_job(json: any) -> Job:
+    job = Job()
+    job.employer_id = json["employer_id"]
+    job.worker_id = json["worker_id"]
+    job.job_name = json["job_name"]
+    job.job_desc = json["job_desc"]
+    job.pay_in_euro = json["pay_in_euro"]
+    job.completed = json["completed"]
+    try:
+        job.id = json["id"]
+    except Exception:
+        job.id = ""
+    return job
