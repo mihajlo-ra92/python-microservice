@@ -45,7 +45,7 @@ def init_test_db():
     return ""
 
 
-@app.route("/read-jobs", methods=["GET"])
+@app.route("/jobs/read-jobs", methods=["GET"])
 def read_jobs():
     jobs: list[Job] = service.read_all()
     return json.dumps(jobs), 200

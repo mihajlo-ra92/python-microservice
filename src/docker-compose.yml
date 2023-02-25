@@ -5,6 +5,8 @@ services:
     restart: always
     ports:
       - "5000:5000"
+    labels:
+      - "traefik.http.routers.users.rule=Host(`users.app.localhost`)"
     environment:
       MYSQL_HOST: mysql
       MYSQL_USER: root
@@ -13,12 +15,15 @@ services:
       - global.env
     depends_on:
       - mysql
+      - traefik
 
   jobs:
     build: ./jobs
     restart: always
     ports:
       - "5001:5000"
+    labels:
+      - "traefik.http.routers.api.rule=(Host(`app.localhost`) && PathPrefix(`/jobs`))"
     environment:
       MYSQL_HOST: mysql
       MYSQL_USER: root
@@ -27,6 +32,7 @@ services:
       - global.env
     depends_on:
       - mysql
+      - traefik
 
   auth:
     build: ./auth
@@ -35,6 +41,9 @@ services:
       - "5002:5000"
     env_file:
       - global.env
+    depends_on:
+      - mysql
+      - traefik
 
   mysql:
     image: mysql:5.7
@@ -50,6 +59,15 @@ services:
       - "3306"
     volumes:
       - my-db:/var/lib/mysql
+
+  traefik:
+    image: traefik:v2.9
+    command: --api.insecure=true --providers.docker
+    ports:
+      - "80:80"
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
 
 volumes:
   my-db:

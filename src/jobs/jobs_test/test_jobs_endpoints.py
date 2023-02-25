@@ -19,7 +19,7 @@ def test_read_all():
     req = requests.get("http://localhost:5001/init-test")
 
     req = requests.get(
-        "http://localhost:5001/read-jobs", json={}, headers={"abs": "sd"}
+        "http://localhost:5001/jobs/read-jobs", json={}, headers={"abs": "sd"}
     )
     assert req.json() == [
         {
