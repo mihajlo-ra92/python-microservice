@@ -114,9 +114,9 @@ def test_read_by_username_invalid():
     assert req.status_code == 400
 
 
-def test_read_by_id_valid():
+def test_read_by_id_safe_valid():
     req = requests.get(
-        "http://app.localhost/users/read-by-id",
+        "http://app.localhost/users/read-by-id-safe",
         json={"id": "43299a1e-b392-11ed-92c6-0242ac170004"},
     )
     assert req.json() == {
@@ -130,8 +130,35 @@ def test_read_by_id_valid():
     assert req.status_code == 200
 
 
-def test_read_by_id_invalid():
-    req = requests.get("http://app.localhost/users/read-by-id", json={"id": "invalid"})
+def test_read_by_id_unsafe_valid():
+    req = requests.get(
+        "http://app.localhost/users/read-by-id-unsafe",
+        json={"id": "43299a1e-b392-11ed-92c6-0242ac170004"},
+    )
+    assert req.json() == {
+        "id": "43299a1e-b392-11ed-92c6-0242ac170004",
+        "username": "test1",
+        "password": None,
+        "email": "test1@gmail.com",
+        "user_type": "WORKER",
+    }
+
+    assert req.status_code == 200
+
+
+def test_read_by_id_safe_invalid():
+    req = requests.get(
+        "http://app.localhost/users/read-by-id-safe", json={"id": "invalid"}
+    )
+    assert req.json() == {"message": "Invalid user_id"}
+
+    assert req.status_code == 400
+
+
+def test_read_by_id_unsafe_invalid():
+    req = requests.get(
+        "http://app.localhost/users/read-by-id-unsafe", json={"id": "invalid"}
+    )
     assert req.json() == {"message": "Invalid user_id"}
 
     assert req.status_code == 400

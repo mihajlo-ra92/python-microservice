@@ -15,9 +15,19 @@ class UserRepo(object):
         cur.execute(f"SELECT id, username, email, user_type FROM Users")
         return zip_data(cur)
 
-    def read_by_id(self, user_id) -> Optional[User]:
+    def read_by_id_unsafe(self, user_id) -> Optional[User]:
         cur = self.mysql.connection.cursor()
         cur.execute(f"SELECT * FROM Users WHERE id='{user_id}';")
+        users = zip_data(cur)
+        if len(users) > 0:
+            return users[0]
+        return None
+
+    def read_by_id_safe(self, user_id) -> Optional[User]:
+        cur = self.mysql.connection.cursor()
+        cur.execute(
+            f"SELECT id, username, email, user_type FROM Users WHERE id='{user_id}';"
+        )
         users = zip_data(cur)
         if len(users) > 0:
             return users[0]

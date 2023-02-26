@@ -8,6 +8,9 @@ from job_utils import read_job, set_logger_config, set_start
 set_logger_config()
 [app, mysql, logger, service] = set_start()
 
+#TODO: Implement read all jobs for employer
+# and read all jobs for worker
+
 
 @app.route("/jobs/init-test")
 def init_test_db():
@@ -93,7 +96,6 @@ def update_job():
 
 @app.route("/jobs/delete", methods=["DELETE"])
 def delete_job():
-    # TODO: Implement auth
     try:
         job_id = request.json["id"]
     except Exception as ex:

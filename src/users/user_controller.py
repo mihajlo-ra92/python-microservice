@@ -35,15 +35,29 @@ def read_all():
     return json.dumps(users), 200
 
 
-@app.route("/users/read-by-id", methods=["GET"])
-def read_by_id():
+@app.route("/users/read-by-id-unsafe", methods=["GET"])
+def read_by_id_unsafe():
     sent_user = request.json
     try:
         user_id = sent_user["id"]
     except Exception as inst:
         logger.info(inst)
         return json.dumps({"message": "Please send id"}), 400
-    user: Optional[User] = service.read_by_id(user_id)
+    user: Optional[User] = service.read_by_id_unsafe(user_id)
+    if user == None:
+        return json.dumps({"message": "Invalid user_id"}), 400
+    return json.dumps(user), 200
+
+
+@app.route("/users/read-by-id-safe", methods=["GET"])
+def read_by_id_safe():
+    sent_user = request.json
+    try:
+        user_id = sent_user["id"]
+    except Exception as inst:
+        logger.info(inst)
+        return json.dumps({"message": "Please send id"}), 400
+    user: Optional[User] = service.read_by_id_safe(user_id)
     if user == None:
         return json.dumps({"message": "Invalid user_id"}), 400
     return json.dumps(user), 200

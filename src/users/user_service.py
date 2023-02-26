@@ -13,8 +13,14 @@ class UserService(object):
     def read_all(self) -> list[User]:
         return self.repo.read_all()
 
-    def read_by_id(self, user_id: str) -> Optional[User]:
-        read_user = self.repo.read_by_id(user_id)
+    def read_by_id_unsafe(self, user_id: str) -> Optional[User]:
+        read_user = self.repo.read_by_id_unsafe(user_id)
+        if read_user != None:
+            read_user["password"] = None
+        return read_user
+
+    def read_by_id_safe(self, user_id: str) -> Optional[User]:
+        read_user = self.repo.read_by_id_safe(user_id)
         if read_user != None:
             read_user["password"] = None
         return read_user
@@ -33,7 +39,7 @@ class UserService(object):
         return self.repo.create(user)
 
     def update(self, user: User, logged_user: UserData) -> Union[Exception, User]:
-        user_to_be_changed: User = self.repo.read_by_id(user.id)
+        user_to_be_changed: User = self.repo.read_by_id_safe(user.id)
         if user_to_be_changed == None:
             return MyException("No user with such id")
         if (
@@ -44,7 +50,7 @@ class UserService(object):
         return MyException("Only admin can update other users")
 
     def delete_by_id(self, user_id) -> bool:
-        if self.repo.read_by_id(user_id) == None:
+        if self.repo.read_by_id_safe(user_id) == None:
             return False
         return self.repo.delete_by_id(user_id)
 
