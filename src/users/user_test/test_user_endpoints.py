@@ -16,10 +16,10 @@ def test_env():
 
 
 def test_read_all():
-    req = requests.get("http://localhost:5000/init-test")
+    req = requests.get("http://app.localhost/users/init-test")
 
     req = requests.get(
-        "http://localhost:5000/read-users", json={}, headers={"abs": "sd"}
+        "http://app.localhost/users/read-all", json={}, headers={"abs": "sd"}
     )
     assert req.json() == [
         {
@@ -45,7 +45,7 @@ def test_read_all():
 
 def test_login():
     req = requests.post(
-        "http://localhost:5002/login", json={"username": "test1", "password": "123"}
+        "http://app.localhost/auth/login", json={"username": "test1", "password": "123"}
     )
     pytest.TOKEN = req.json()["Bearer"]
     data = jwt.decode(pytest.TOKEN, os.environ.get("SECRET_KEY"), algorithms=["HS256"])
@@ -54,7 +54,7 @@ def test_login():
 
 def test_no_token():
     req = requests.get(
-        "http://localhost:5000/read-logged-user", json={"username": "test1"}
+        "http://app.localhost/users/read-logged-in", json={"username": "test1"}
     )
     assert req.json() == {"message": "Token is missing"}
     assert req.status_code == 401
@@ -64,7 +64,7 @@ def test_invalid_token():
     print("TOKEN")
     print(pytest.TOKEN)
     req = requests.get(
-        "http://localhost:5000/read-logged-user",
+        "http://app.localhost/users/read-logged-in",
         json={"username": "test1"},
         headers={"Bearer": "Invalid token"},
     )
@@ -76,7 +76,7 @@ def test_read_by_logged_user_valid():
     print("TOKEN")
     print(pytest.TOKEN)
     req = requests.get(
-        "http://localhost:5000/read-logged-user",
+        "http://app.localhost/users/read-logged-in",
         headers={"Bearer": pytest.TOKEN},
     )
     assert req.json() == {
@@ -90,7 +90,7 @@ def test_read_by_logged_user_valid():
 
 def test_read_by_username_valid():
     req = requests.get(
-        "http://localhost:5000/read-by-username",
+        "http://app.localhost/users/read-by-username",
         json={"username": "test1"},
     )
     assert req.json() == {
@@ -106,7 +106,7 @@ def test_read_by_username_invalid():
     print("TOKEN")
     print(pytest.TOKEN)
     req = requests.get(
-        "http://localhost:5000/read-by-username",
+        "http://app.localhost/users/read-by-username",
         json={"username": "invalid_username"},
         headers={"Bearer": pytest.TOKEN},
     )
@@ -116,7 +116,7 @@ def test_read_by_username_invalid():
 
 def test_read_by_id_valid():
     req = requests.get(
-        "http://localhost:5000/read-by-id",
+        "http://app.localhost/users/read-by-id",
         json={"id": "43299a1e-b392-11ed-92c6-0242ac170004"},
     )
     assert req.json() == {
@@ -131,7 +131,7 @@ def test_read_by_id_valid():
 
 
 def test_read_by_id_invalid():
-    req = requests.get("http://localhost:5000/read-by-id", json={"id": "invalid"})
+    req = requests.get("http://app.localhost/users/read-by-id", json={"id": "invalid"})
     assert req.json() == {"message": "Invalid user_id"}
 
     assert req.status_code == 400
@@ -139,7 +139,7 @@ def test_read_by_id_invalid():
 
 def test_create_user_valid():
     req = requests.post(
-        "http://localhost:5000/create-user",
+        "http://app.localhost/users/create",
         json={
             "username": "test4",
             "password": "123",
@@ -153,7 +153,7 @@ def test_create_user_valid():
 
 def test_create_user_taken_username():
     req = requests.post(
-        "http://localhost:5000/create-user",
+        "http://app.localhost/users/create",
         json={
             "username": "test2",
             "password": "123",
@@ -167,7 +167,7 @@ def test_create_user_taken_username():
 
 def test_create_user_taken_email():
     req = requests.post(
-        "http://localhost:5000/create-user",
+        "http://app.localhost/users/create",
         json={
             "username": "not taken",
             "password": "123",
@@ -181,7 +181,7 @@ def test_create_user_taken_email():
 
 def test_update_user_valid():
     req = requests.put(
-        "http://localhost:5000/update-user",
+        "http://app.localhost/users/update",
         json={
             "email": "test1@gmail.com",
             "id": "43299a1e-b392-11ed-92c6-0242ac170004",
@@ -203,7 +203,7 @@ def test_update_user_valid():
 
 def test_delete_user_valid():
     req = requests.delete(
-        "http://localhost:5000/delete-user",
+        "http://app.localhost/users/delete",
         json={"id": "43299a1e-b392-11ed-92c6-0242ac170004"},
         headers={"Bearer": pytest.TOKEN},
     )
@@ -213,7 +213,7 @@ def test_delete_user_valid():
 
 def test_delete_user_invalid():
     req = requests.delete(
-        "http://localhost:5000/delete-user",
+        "http://app.localhost/users/delete",
         json={"id": "invalid"},
         headers={"Bearer": pytest.TOKEN},
     )

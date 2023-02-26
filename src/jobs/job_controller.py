@@ -9,7 +9,7 @@ set_logger_config()
 [app, mysql, logger, service] = set_start()
 
 
-@app.route("/init-test")
+@app.route("/jobs/init-test")
 def init_test_db():
     if os.environ.get("TEST") == "TRUE":
         cur = mysql.connection.cursor()
@@ -45,13 +45,13 @@ def init_test_db():
     return ""
 
 
-@app.route("/jobs/read-jobs", methods=["GET"])
+@app.route("/jobs/read-all", methods=["GET"])
 def read_jobs():
     jobs: list[Job] = service.read_all()
     return json.dumps(jobs), 200
 
 
-@app.route("/read-by-id", methods=["GET"])
+@app.route("/jobs/read-by-id", methods=["GET"])
 def read_by_id():
     sent_job = request.json
     try:
@@ -65,7 +65,7 @@ def read_by_id():
     return json.dumps(job), 200
 
 
-@app.route("/create-job", methods=["POST"])
+@app.route("/jobs/create", methods=["POST"])
 def create_job():
     try:
         sent_job: Job = read_job(request.json)
@@ -78,7 +78,7 @@ def create_job():
     return json.dumps({"message": str(retVal)}), 400
 
 
-@app.route("/update-job", methods=["PUT"])
+@app.route("/jobs/update", methods=["PUT"])
 def update_job():
     try:
         sent_job: Job = read_job(request.json)
@@ -91,7 +91,7 @@ def update_job():
     return json.dumps({"message": str(retVal)}), 401
 
 
-@app.route("/delete-job", methods=["DELETE"])
+@app.route("/jobs/delete", methods=["DELETE"])
 def delete_job():
     # TODO: Implement auth
     try:

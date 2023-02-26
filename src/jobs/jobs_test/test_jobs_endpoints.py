@@ -16,10 +16,10 @@ def test_env():
 
 
 def test_read_all():
-    req = requests.get("http://localhost:5001/init-test")
+    req = requests.get("http://app.localhost/jobs/init-test")
 
     req = requests.get(
-        "http://localhost:5001/jobs/read-jobs", json={}, headers={"abs": "sd"}
+        "http://app.localhost/jobs/read-all", json={}, headers={"abs": "sd"}
     )
     assert req.json() == [
         {
@@ -71,7 +71,7 @@ def test_read_all():
 
 
 def test_read_by_id_valid():
-    req = requests.get("http://localhost:5001/read-by-id", json={"id": "job1"})
+    req = requests.get("http://app.localhost/jobs/read-by-id", json={"id": "job1"})
     assert req.json() == {
         "id": "job1",
         "employer_id": "employer1",
@@ -84,13 +84,13 @@ def test_read_by_id_valid():
 
 
 def test_read_by_id_invalid():
-    req = requests.get("http://localhost:5001/read-by-id", json={"id": "invalid"})
+    req = requests.get("http://app.localhost/jobs/read-by-id", json={"id": "invalid"})
     assert req.json() == {"message": "Invalid job_id"}
 
 
 def test_create_job_valid():
     req = requests.post(
-        "http://localhost:5001/create-job",
+        "http://app.localhost/jobs/create",
         json={
             "id": "job6",
             "employer_id": "employer1",
@@ -106,7 +106,7 @@ def test_create_job_valid():
 
 def test_create_job_invalid():
     req = requests.post(
-        "http://localhost:5001/create-job",
+        "http://app.localhost/jobs/create",
         json={
             "id": "job6",
             "employer_id": "employer1",
@@ -122,7 +122,7 @@ def test_create_job_invalid():
 
 def test_create_job_worker():
     req = requests.post(
-        "http://localhost:5001/create-job",
+        "http://app.localhost/jobs/create",
         json={
             "id": "job6",
             "employer_id": "worker1",
@@ -138,7 +138,7 @@ def test_create_job_worker():
 
 def test_create_job_invalid_employer_id():
     req = requests.post(
-        "http://localhost:5001/create-job",
+        "http://app.localhost/jobs/create",
         json={
             "id": "job6",
             "employer_id": "invalid",
@@ -154,7 +154,7 @@ def test_create_job_invalid_employer_id():
 
 def test_update_job_valid():
     req = requests.put(
-        "http://localhost:5001/update-job",
+        "http://app.localhost/jobs/update",
         json={
             "id": "job1",
             "employer_id": "employer1",
@@ -179,7 +179,7 @@ def test_update_job_valid():
 
 def test_delete_user_valid():
     req = requests.delete(
-        "http://localhost:5001/delete-job",
+        "http://app.localhost/jobs/delete",
         json={"id": "job1"},
     )
     assert req.json() == True
@@ -188,7 +188,7 @@ def test_delete_user_valid():
 
 def test_delete_user_invalid():
     req = requests.delete(
-        "http://localhost:5001/delete-job",
+        "http://app.localhost/jobs/delete",
         json={"id": "invalid"},
     )
     assert req.json() == False

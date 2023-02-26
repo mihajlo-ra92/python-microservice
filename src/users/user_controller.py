@@ -9,7 +9,7 @@ set_logger_config()
 [app, mysql, logger, service] = set_start()
 
 
-@app.route("/init-test")
+@app.route("/users/init-test")
 def init_test_db():
     if os.environ.get("TEST") == "TRUE":
         cur = mysql.connection.cursor()
@@ -29,13 +29,13 @@ def init_test_db():
     return ""
 
 
-@app.route("/read-users", methods=["GET"])
+@app.route("/users/read-all", methods=["GET"])
 def read_all():
     users: list[User] = service.read_all()
     return json.dumps(users), 200
 
 
-@app.route("/read-by-id", methods=["GET"])
+@app.route("/users/read-by-id", methods=["GET"])
 def read_by_id():
     sent_user = request.json
     try:
@@ -50,7 +50,7 @@ def read_by_id():
 
 
 # NOTE: Reads by username in jwt
-@app.route("/read-logged-user", methods=["GET"])
+@app.route("/users/read-logged-in", methods=["GET"])
 @token_required
 def read_logged_user(user_data):
     logged_user: UserData = user_data
@@ -61,7 +61,7 @@ def read_logged_user(user_data):
     return json.dumps(user), 200
 
 
-@app.route("/read-by-username", methods=["GET"])
+@app.route("/users/read-by-username", methods=["GET"])
 def read_by_username():
     try:
         username = request.json["username"]
@@ -74,7 +74,7 @@ def read_by_username():
     return json.dumps(user), 200
 
 
-@app.route("/create-user", methods=["POST"])
+@app.route("/users/create", methods=["POST"])
 def create():
     try:
         sent_user: User = read_user(request.json)
@@ -87,7 +87,7 @@ def create():
     return json.dumps({"message": str(retVal)}), 400
 
 
-@app.route("/update-user", methods=["PUT"])
+@app.route("/users/update", methods=["PUT"])
 @token_required
 def update(logged_user: UserData):
     logger.info(f"Logged user: {logged_user}")
@@ -102,7 +102,7 @@ def update(logged_user: UserData):
     return json.dumps({"message": str(retVal)}), 401
 
 
-@app.route("/delete-user", methods=["DELETE"])
+@app.route("/users/delete", methods=["DELETE"])
 @token_required
 def delete(user_data):
     # TODO: check jwt, user must be admin ar ids must match
@@ -112,7 +112,7 @@ def delete(user_data):
     return json.dumps(deleted), 200
 
 
-@app.route("/check-info", methods=["GET"])
+@app.route("/users/check-info", methods=["GET"])
 def check_info():
     try:
         username, password = request.json["username"], request.json["password"]

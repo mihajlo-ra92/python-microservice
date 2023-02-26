@@ -25,7 +25,7 @@ class JobService(object):
         return self.repo.read_by_worker_id(worker_id)
 
     def create(self, job: Job) -> Union[Exception, Job]:
-        req = requests.get("http://users:5000/read-by-id", json={"id": job.employer_id})
+        req = requests.get("http://users:5000/users/read-by-id", json={"id": job.employer_id})
         self.logger.info(f"recived req json: {req.json()}")
         try:
             if req.json()["message"] == "Invalid user_id":

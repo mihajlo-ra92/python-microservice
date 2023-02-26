@@ -53,22 +53,22 @@ def token_required(f):
     return decorated
 
 
-@app.route("/unprotected")
+@app.route("/auth/unprotected")
 def unprotected():
     return "unprotected"
 
 
-@app.route("/protected")
+@app.route("/auth/protected")
 @token_required
 def protected(user_data):
     return f"user_data is: {user_data}"
 
 
-@app.route("/login", methods=["POST"])
+@app.route("/auth/login", methods=["POST"])
 def login():
     username, password = request.json["username"], request.json["password"]
     req = requests.get(
-        "http://users:5000/check-info",
+        "http://users:5000/users/check-info",
         json={"username": username, "password": password},
     )
     try:
