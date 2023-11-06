@@ -1,1 +1,11 @@
 # python-microservice
+
+Run tests:
+cd to users/user_test
+pytest -vv
+
+venv:
+source venv/bin/activate
+deactivate venv
+after adding new dependency
+pip freeze > requirements.txt

@@ -3,6 +3,23 @@ from typing import Optional, Union
 from user_repo import UserRepo
 from flask_mysqldb import MySQL
 from user_model import MyException, User, UserData
+from opentelemetry import trace
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import (
+    BatchSpanProcessor,
+    ConsoleSpanExporter,
+)
+from opentelemetry import trace
+
+provider = TracerProvider()
+processor = BatchSpanProcessor(ConsoleSpanExporter())
+provider.add_span_processor(processor)
+
+# Sets the global default tracer provider
+trace.set_tracer_provider(provider)
+
+# Creates a tracer from the global tracer provider
+tracer = trace.get_tracer("user_tracer")
 
 
 class UserService(object):
@@ -11,7 +28,8 @@ class UserService(object):
         self.repo = UserRepo(mysql, logger)
 
     def read_all(self) -> list[User]:
-        return self.repo.read_all()
+        with tracer.start_as_current_span("service") as child:
+            return self.repo.read_all()
 
     def read_by_id_unsafe(self, user_id: str) -> Optional[User]:
         read_user = self.repo.read_by_id_unsafe(user_id)

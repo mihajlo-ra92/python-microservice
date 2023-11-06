@@ -8,7 +8,7 @@ from job_utils import read_job, set_logger_config, set_start
 set_logger_config()
 [app, mysql, logger, service] = set_start()
 
-#TODO: Implement read all jobs for employer
+# TODO: Implement read all jobs for employer
 # and read all jobs for worker
 
 

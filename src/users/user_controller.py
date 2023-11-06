@@ -3,6 +3,23 @@ from typing import Optional, Union
 from flask import request
 from user_model import User, UserData
 from user_utils import read_user, set_logger_config, set_start, token_required
+from opentelemetry import trace
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import (
+    BatchSpanProcessor,
+    ConsoleSpanExporter,
+)
+from opentelemetry.trace import Status, StatusCode
+
+provider = TracerProvider()
+processor = BatchSpanProcessor(ConsoleSpanExporter())
+provider.add_span_processor(processor)
+
+# Sets the global default tracer provider
+trace.set_tracer_provider(provider)
+
+# Creates a tracer from the global tracer provider
+tracer = trace.get_tracer("user_tracer")
 
 
 set_logger_config()
@@ -31,8 +48,10 @@ def init_test_db():
 
 @app.route("/users/read-all", methods=["GET"])
 def read_all():
-    users: list[User] = service.read_all()
-    return json.dumps(users), 200
+    with tracer.start_as_current_span("/users/read-all") as span:
+        users: list[User] = service.read_all()
+        span.set_status(Status(StatusCode.OK))
+        return json.dumps(users), 200
 
 
 @app.route("/users/read-by-id-unsafe", methods=["GET"])
