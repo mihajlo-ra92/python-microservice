@@ -28,7 +28,7 @@ class UserService(object):
         self.repo = UserRepo(mysql, logger)
 
     def read_all(self) -> list[User]:
-        with tracer.start_as_current_span("service") as child:
+        with tracer.start_as_current_span("service.read_all") as child:
             return self.repo.read_all()
 
     def read_by_id_unsafe(self, user_id: str) -> Optional[User]:
@@ -73,9 +73,10 @@ class UserService(object):
         return self.repo.delete_by_id(user_id)
 
     def check_info(self, username, password) -> Union[str, tuple[str, str]]:
-        read_user = self.repo.read_by_username(username)
-        if read_user == None:
-            return "Username invalid"
-        if read_user["password"] != password:
-            return "Password invalid"
-        return [read_user["username"], read_user["user_type"]]
+        with tracer.start_as_current_span("service.check_info") as child:
+            read_user = self.repo.read_by_username(username)
+            if read_user == None:
+                return "Username invalid"
+            if read_user["password"] != password:
+                return "Password invalid"
+            return [read_user["username"], read_user["user_type"]]

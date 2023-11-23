@@ -28,7 +28,7 @@ class UserRepo(object):
         self.logger = logger
 
     def read_all(self) -> list[User]:
-        with tracer.start_as_current_span("repo") as child:
+        with tracer.start_as_current_span("repo.read_all") as child:
             # current_span = trace.get_current_span()
             child.set_attribute("operation.value", 1)
             child.set_attribute("operation.name", "Saying hello!")
@@ -55,12 +55,13 @@ class UserRepo(object):
         return None
 
     def read_by_username(self, username) -> Optional[User]:
-        cur = self.mysql.connection.cursor()
-        cur.execute(f"SELECT * FROM Users WHERE username='{username}';")
-        users = zip_data(cur)
-        if len(users) > 0:
-            return users[0]
-        return None
+        with tracer.start_as_current_span("repo.read_by_username") as child:
+            cur = self.mysql.connection.cursor()
+            cur.execute(f"SELECT * FROM Users WHERE username='{username}';")
+            users = zip_data(cur)
+            if len(users) > 0:
+                return users[0]
+            return None
 
     def create(self, user: User) -> Union[Exception, User]:
         user.id = str(uuid.uuid1())

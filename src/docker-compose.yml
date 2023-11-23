@@ -9,6 +9,7 @@ services:
       MYSQL_HOST: mysql
       MYSQL_USER: root
       MYSQL_PASSWORD: password
+      OTEL_SERVICE_NAME: user
     env_file:
       - global.env
     depends_on:
@@ -36,11 +37,14 @@ services:
     restart: always
     labels:
       - "traefik.http.routers.auth.rule=(Host(`app.localhost`) && PathPrefix(`/auth`))"
+    environment:
+      OTEL_SERVICE_NAME: auth
     env_file:
       - global.env
     depends_on:
       - mysql
       - traefik
+      - jaeger
 
   mysql:
     image: mysql:5.7

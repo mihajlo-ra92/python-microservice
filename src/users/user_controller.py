@@ -8,12 +8,11 @@ from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import (
     BatchSpanProcessor,
 )
+from opentelemetry.trace.propagation.tracecontext import TraceContextTextMapPropagator
 from opentelemetry.trace import Status, StatusCode
 from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
 from opentelemetry.sdk.resources import Resource
 
-# Resource can be required for some backends, e.g. Jaeger
-# If resource wouldn't be set - traces wouldn't appears in Jaeger
 resource = Resource(attributes={"service.name": "user_service"})
 
 trace.set_tracer_provider(TracerProvider(resource=resource))
@@ -52,8 +51,6 @@ def init_test_db():
 
 @app.route("/users/read-all", methods=["GET"])
 def read_all():
-    print("jeager env:")
-    print(os.environ.get("JEAGER_HOST_PORT"))
     with tracer.start_as_current_span("[GET] /users/read-all") as span:
         users: list[User] = service.read_all()
         span.set_status(Status(StatusCode.OK))
@@ -151,20 +148,29 @@ def delete(user_data):
     return json.dumps(deleted), 200
 
 
+def get_header_from_flask_request(request, key):
+    return request.headers.get_all(key)
+
+
 @app.route("/users/check-info", methods=["GET"])
 def check_info():
-    try:
-        username, password = request.json["username"], request.json["password"]
-    except Exception as inst:
-        logger.info(inst)
-        return json.dumps({"message": "Please send username and password"}), 400
-    jwt_data: Union[str, tuple[str, str]] = service.check_info(username, password)
-    logger.info(jwt_data)
-    if jwt_data == "Username invalid":
-        return json.dumps({"message": jwt_data}), 401
-    if jwt_data == "Password invalid":
-        return json.dumps({"message": jwt_data}), 401
-    return json.dumps({"username": jwt_data[0], "user_type": jwt_data[1]})
+    traceparent = get_header_from_flask_request(request, "traceparent")
+    carrier = {"traceparent": traceparent[0]}
+    ctx = TraceContextTextMapPropagator().extract(carrier)
+    with tracer.start_as_current_span("[GET] /users/check-info", context=ctx) as span:
+        try:
+            username, password = request.json["username"], request.json["password"]
+        except Exception as inst:
+            logger.info(inst)
+            return json.dumps({"message": "Please send username and password"}), 400
+        jwt_data: Union[str, tuple[str, str]] = service.check_info(username, password)
+        logger.info(jwt_data)
+        if jwt_data == "Username invalid":
+            return json.dumps({"message": jwt_data}), 401
+        if jwt_data == "Password invalid":
+            return json.dumps({"message": jwt_data}), 401
+        span.set_status(Status(StatusCode.OK))
+        return json.dumps({"username": jwt_data[0], "user_type": jwt_data[1]})
 
 
 if __name__ == "__main__":

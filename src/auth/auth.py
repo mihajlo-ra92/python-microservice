@@ -1,8 +1,27 @@
 from dataclasses import dataclass
-from functools import wraps
 import requests, json, jwt, datetime, os
-from flask import Flask, jsonify, request
+from flask import Flask, request
 from logging.config import dictConfig
+from opentelemetry.sdk.resources import Resource
+from opentelemetry import trace
+from opentelemetry.trace.propagation.tracecontext import TraceContextTextMapPropagator
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
+from opentelemetry.trace import Status, StatusCode
+from opentelemetry.sdk.trace.export import (
+    BatchSpanProcessor,
+)
+
+resource = Resource(attributes={"service.name": "auth"})
+
+trace.set_tracer_provider(TracerProvider(resource=resource))
+tracer = trace.get_tracer("user_service")
+
+otlp_exporter = OTLPSpanExporter(endpoint="http://jaeger:4317", insecure=True)
+
+span_processor = BatchSpanProcessor(otlp_exporter)
+
+trace.get_tracer_provider().add_span_processor(span_processor)
 
 dictConfig(
     {
@@ -22,6 +41,7 @@ dictConfig(
         "root": {"level": "INFO", "handlers": ["wsgi"]},
     }
 )
+
 app = Flask(__name__)
 
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY")
@@ -33,59 +53,35 @@ class UserData:
     user_type: str
 
 
-def token_required(f):
-    @wraps(f)
-    def decorated(*args, **kwargs):
-        token = request.headers.get(
-            "Bearer"
-        )  # http://localhost:5002/route?token=eydsafdsaf
-        app.logger.info(token)
-        if not token:
-            return json.dumps({"message": "Token is missing"}), 401
-        try:
-            data = jwt.decode(token, app.config["SECRET_KEY"], algorithms=["HS256"])
-        except Exception as inst:
-            app.logger.info(inst)
-            return json.dumps({"message": "Token is missing or invalid"}), 401
-        user_data = UserData(data["username"], data["user_type"])
-        return f(user_data, *args, **kwargs)
-
-    return decorated
-
-
-@app.route("/auth/unprotected")
-def unprotected():
-    return "unprotected"
-
-
-@app.route("/auth/protected")
-@token_required
-def protected(user_data):
-    return f"user_data is: {user_data}"
-
-
 @app.route("/auth/login", methods=["POST"])
 def login():
-    username, password = request.json["username"], request.json["password"]
-    req = requests.get(
-        "http://users:5000/users/check-info",
-        json={"username": username, "password": password},
-    )
-    try:
-        req.json()["message"]
-        return req.json(), 401
-    except:
-        pass
+    with tracer.start_as_current_span("[POST] /auth/login") as span:
+        username, password = request.json["username"], request.json["password"]
+        carrier = {}
+        TraceContextTextMapPropagator().inject(carrier)
+        header = {"traceparent": carrier["traceparent"]}
+        req = requests.get(
+            "http://users:5000/users/check-info",
+            json={"username": username, "password": password},
+            headers=header,
+        )
+        try:
+            req.json()["message"]
+            return req.json(), 401
+        except:
+            pass
 
-    token = jwt.encode(
-        {
-            "username": username,
-            "user_type": req.json()["user_type"],
-            "exp": datetime.datetime.utcnow() + datetime.timedelta(hours=24),
-        },
-        app.config["SECRET_KEY"],
-    )
-    return json.dumps({"Bearer": token}), 201
+        token = jwt.encode(
+            {
+                # TODO: Maybe add userId
+                "username": username,
+                "user_type": req.json()["user_type"],
+                "exp": datetime.datetime.utcnow() + datetime.timedelta(hours=24),
+            },
+            app.config["SECRET_KEY"],
+        )
+        span.set_status(Status(StatusCode.OK))
+        return json.dumps({"Bearer": token}), 201
 
 
 if __name__ == "__main__":
