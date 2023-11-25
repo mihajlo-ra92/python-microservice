@@ -3,7 +3,7 @@ import requests, json, jwt, datetime, os
 from flask import Flask, request
 from logging.config import dictConfig
 from opentelemetry.sdk.resources import Resource
-from opentelemetry import trace
+from opentelemetry import trace, metrics
 from opentelemetry.trace.propagation.tracecontext import TraceContextTextMapPropagator
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
@@ -12,16 +12,34 @@ from opentelemetry.sdk.trace.export import (
     BatchSpanProcessor,
 )
 
-resource = Resource(attributes={"service.name": "auth"})
+from opentelemetry.exporter.prometheus import PrometheusMetricReader
+from opentelemetry.sdk.metrics import MeterProvider
+from opentelemetry.sdk.resources import SERVICE_NAME, Resource
+from prometheus_client import start_http_server
 
+
+resource = Resource(attributes={"service.name": "auth"})
 trace.set_tracer_provider(TracerProvider(resource=resource))
 tracer = trace.get_tracer("user_service")
-
 otlp_exporter = OTLPSpanExporter(endpoint="http://jaeger:4317", insecure=True)
-
 span_processor = BatchSpanProcessor(otlp_exporter)
-
 trace.get_tracer_provider().add_span_processor(span_processor)
+
+# resource = Resource(attributes={
+#     SERVICE_NAME: "auth-service"
+# })
+# Start Prometheus client
+start_http_server(port=8000, addr="0.0.0.0")
+# Initialize PrometheusMetricReader which pulls metrics from the SDK
+# on-demand to respond to scrape requests
+reader = PrometheusMetricReader()
+provider = MeterProvider(resource=resource, metric_readers=[reader])
+metrics.set_meter_provider(provider)
+meter = provider.get_meter("auth-meter")
+login_counter = meter.create_counter(
+    name="login-counter", description="number of successful logins"
+)
+
 
 dictConfig(
     {
@@ -66,6 +84,7 @@ def login():
             headers=header,
         )
         try:
+            login_counter.add(1)
             req.json()["message"]
             return req.json(), 401
         except:

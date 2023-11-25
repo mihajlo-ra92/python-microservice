@@ -71,10 +71,18 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
 
   jaeger:
+    # TODO: change version from latest
     image: jaegertracing/all-in-one:latest
     ports:
       - 16686:16686
       - 14269:14269
+
+  prometheus:
+    image: prom/prometheus:v2.48.0
+    volumes:
+      - "./prometheus:/etc/prometheus"
+    ports:
+      - 9090:9090
 
 volumes:
   my-db:
