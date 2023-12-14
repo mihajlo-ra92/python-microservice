@@ -9,3 +9,6 @@ source venv/bin/activate
 deactivate venv
 after adding new dependency
 pip freeze > requirements.txt
+
+Check metrics:
+login_counter_total
