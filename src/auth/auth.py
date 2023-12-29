@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 import requests, json, jwt, datetime, os
 from flask import Flask, request
+from flask_cors import CORS
 from logging.config import dictConfig
 from opentelemetry.sdk.resources import Resource
 from opentelemetry import trace, metrics
@@ -61,6 +62,7 @@ dictConfig(
 )
 
 app = Flask(__name__)
+CORS(app,origins="*", supports_credentials="*")
 
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY")
 
@@ -93,6 +95,7 @@ def login():
         token = jwt.encode(
             {
                 # TODO: Maybe add userId
+                "user_id":req.json()["user_id"],
                 "username": username,
                 "user_type": req.json()["user_type"],
                 "exp": datetime.datetime.utcnow() + datetime.timedelta(hours=24),
@@ -100,7 +103,7 @@ def login():
             app.config["SECRET_KEY"],
         )
         span.set_status(Status(StatusCode.OK))
-        return json.dumps({"Bearer": token}), 201
+        return json.dumps({"Bearer": token, "user_type":req.json()["user_type"],"user_id":req.json()["user_id"]}), 201
 
 
 if __name__ == "__main__":

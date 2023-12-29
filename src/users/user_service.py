@@ -79,4 +79,4 @@ class UserService(object):
                 return "Username invalid"
             if read_user["password"] != password:
                 return "Password invalid"
-            return [read_user["username"], read_user["user_type"]]
+            return [read_user["username"], read_user["user_type"],read_user["id"]]

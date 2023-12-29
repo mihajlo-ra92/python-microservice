@@ -1,6 +1,7 @@
 import json, os
 from typing import Optional, Union
 from flask import request
+from flask_cors import CORS
 from user_model import User, UserData
 from user_utils import read_user, set_logger_config, set_start, token_required
 from opentelemetry import trace
@@ -28,6 +29,7 @@ trace.get_tracer_provider().add_span_processor(span_processor)
 set_logger_config()
 [app, mysql, logger, service] = set_start()
 
+CORS(app,origins="*", supports_credentials="*")
 
 @app.route("/users/init-test")
 def init_test_db():
@@ -170,7 +172,7 @@ def check_info():
         if jwt_data == "Password invalid":
             return json.dumps({"message": jwt_data}), 401
         span.set_status(Status(StatusCode.OK))
-        return json.dumps({"username": jwt_data[0], "user_type": jwt_data[1]})
+        return json.dumps({"username": jwt_data[0], "user_type": jwt_data[1],"user_id":jwt_data[2]})
 
 
 if __name__ == "__main__":
