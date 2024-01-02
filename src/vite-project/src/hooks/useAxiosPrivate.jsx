@@ -9,7 +9,8 @@ export const useAxiosPrivate = () => {
     const requestIntercept = axiosPrivate.interceptors.request.use(
       (config) => {
         if (!config.headers["Bearer"]) {
-          config.headers["Bearer"] = `${auth?.accessToken}`;
+          config.headers["Bearer"] = `${localStorage.getItem("token")}`;
+          // config.headers["Bearer"] = `${auth?.accessToken}`;
         }
         return config;
       },

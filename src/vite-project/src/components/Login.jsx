@@ -42,6 +42,8 @@ const Login = () => {
       console.log(JSON.stringify(response?.data));
       //console.log(JSON.stringify(response));
       const accessToken = response?.data?.Bearer;
+      localStorage.setItem("token", accessToken);
+      localStorage.setItem("role", accessToken);
       const role = response?.data?.user_type;
       console.log({ user, pwd, role, accessToken });
       setAuth({ user, pwd, role, accessToken });
