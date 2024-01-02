@@ -14,6 +14,7 @@ const Users = () => {
 
     const getUsers = async () => {
       try {
+        // NOTE: For some reason allways aborts request
         // const response = await axiosPrivate.get("/users/read-logged-in", {
         //   signal: controller.signal,
         // });

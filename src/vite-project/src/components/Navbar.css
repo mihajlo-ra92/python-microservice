@@ -1,0 +1,24 @@
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  background-color: #333366;
+}
+
+.left-options a {
+  margin-right: 10px;
+  color: #ffff33;
+  text-decoration: none;
+}
+
+.right-options a {
+  color: #ffff33;
+  text-decoration: none;
+  margin-right: 10px;
+}
+
+.left-options img.home-icon {
+  width: 120px;
+  margin-right: 10px;
+}

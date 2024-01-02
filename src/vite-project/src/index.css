@@ -14,7 +14,7 @@ html {
 
 body {
   min-height: 100vh;
-  background-color: dodgerblue;
+  background-color: #d4d4ff;
 }
 
 .App {
@@ -45,10 +45,10 @@ form {
   padding-bottom: 1rem;
 }
 
-a,
+/* a,logged
 a:visited {
   color: #fff;
-}
+} */
 
 input[type="text"],
 input[type="password"],

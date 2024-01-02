@@ -8,8 +8,7 @@ const RequireAuth = ({ allowedRoles }) => {
   const token = localStorage.getItem("token");
   const decodedToken = token ? jwtDecode(token) : null;
 
-  return allowedRoles.includes(decodedToken.user_type) ? (
-    // return allowedRoles.includes(decodedToken.role) ? (
+  return allowedRoles.includes(decodedToken?.user_type) ? (
     <Outlet />
   ) : auth?.user ? (
     <Navigate to="/unauthorized" state={{ from: location }} replace />
