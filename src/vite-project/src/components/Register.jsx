@@ -9,16 +9,18 @@ import axios from "../api/axios";
 import { Link } from "react-router-dom";
 
 const USER_REGEX = /^[A-z][A-z0-9-_]{3,23}$/;
-const PWD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%]).{8,24}$/;
-const REGISTER_URL = "/register";
+const PWD_REGEX = /^.{3,}$/;
+const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+const REGISTER_URL = "/users/create";
 
 const Register = () => {
   const userRef = useRef();
   const errRef = useRef();
 
-  const [user, setUser] = useState("");
-  const [validName, setValidName] = useState(false);
-  const [userFocus, setUserFocus] = useState(false);
+  const [username, setUsername] = useState("");
+  const [validUsername, setValidUsername] = useState(false);
+  const [usernameFocus, setUsernameFocus] = useState(false);
 
   const [pwd, setPwd] = useState("");
   const [validPwd, setValidPwd] = useState(false);
@@ -28,6 +30,10 @@ const Register = () => {
   const [validMatch, setValidMatch] = useState(false);
   const [matchFocus, setMatchFocus] = useState(false);
 
+  const [email, setEmail] = useState("");
+  const [validEmail, setValidEmail] = useState(false);
+  const [emailFocus, setEmailFocus] = useState(false);
+
   const [errMsg, setErrMsg] = useState("");
   const [success, setSuccess] = useState(false);
 
@@ -36,8 +42,8 @@ const Register = () => {
   }, []);
 
   useEffect(() => {
-    setValidName(USER_REGEX.test(user));
-  }, [user]);
+    setValidUsername(USER_REGEX.test(username));
+  }, [username]);
 
   useEffect(() => {
     setValidPwd(PWD_REGEX.test(pwd));
@@ -45,42 +51,49 @@ const Register = () => {
   }, [pwd, matchPwd]);
 
   useEffect(() => {
+    setValidEmail(EMAIL_REGEX.test(email));
+  }, [email]);
+
+  useEffect(() => {
     setErrMsg("");
-  }, [user, pwd, matchPwd]);
+  }, [username, pwd, matchPwd]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     // if button enabled with JS hack
-    const v1 = USER_REGEX.test(user);
+    const v1 = USER_REGEX.test(username);
     const v2 = PWD_REGEX.test(pwd);
-    if (!v1 || !v2) {
+    const v3 = EMAIL_REGEX.test(email);
+    if (!v1 || !v2 || !v3) {
       setErrMsg("Invalid Entry");
       return;
     }
     try {
       const response = await axios.post(
         REGISTER_URL,
-        JSON.stringify({ user, pwd }),
+        JSON.stringify({ username, password: pwd, email, user_type: "WORKER" }),
         {
           headers: { "Content-Type": "application/json" },
           withCredentials: true,
         }
       );
-      // TODO: remove console.logs before deployment
       console.log(JSON.stringify(response?.data));
-      //console.log(JSON.stringify(response))
       setSuccess(true);
-      //clear state and controlled inputs
-      setUser("");
+      setUsername("");
       setPwd("");
       setMatchPwd("");
+      setEmail("");
     } catch (err) {
-      if (!err?.response) {
-        setErrMsg("No Server Response");
-      } else if (err.response?.status === 409) {
-        setErrMsg("Username Taken");
+      console.log(err.response.data.message);
+      if (err.response.data.message) {
+        console.log(
+          err.response.data.message.split(",").slice(1).join("").slice(2, -2)
+        );
+        setErrMsg(
+          err.response.data.message.split(",").slice(1).join("").slice(2, -2)
+        );
       } else {
-        setErrMsg("Registration Failed");
+        setErrMsg("No Server Response");
       }
       errRef.current.focus();
     }
@@ -106,34 +119,77 @@ const Register = () => {
           </p>
           <h1>Register</h1>
           <form onSubmit={handleSubmit}>
+            {/* EMAIL */}
+
+            <label htmlFor="email">
+              Email:
+              <FontAwesomeIcon
+                icon={faCheck}
+                className={validEmail ? "valid" : "hide"}
+              />
+              <FontAwesomeIcon
+                icon={faTimes}
+                className={validEmail || !email ? "hide" : "invalid"}
+              />
+            </label>
+
+            <input
+              type="text"
+              id="email"
+              ref={userRef}
+              autoComplete="off"
+              onChange={(e) => setEmail(e.target.value)}
+              value={email}
+              required
+              aria-invalid={validEmail ? "false" : "true"}
+              aria-describedby="uidnote"
+              onFocus={() => setEmailFocus(true)}
+              onBlur={() => setEmailFocus(false)}
+            />
+
+            <p
+              id="uidnote"
+              className={
+                emailFocus && email && !validEmail
+                  ? "instructions"
+                  : "offscreen"
+              }
+            >
+              <FontAwesomeIcon icon={faInfoCircle} />
+              Must be valid email
+            </p>
+
+            {/* USERNAME */}
             <label htmlFor="username">
               Username:
               <FontAwesomeIcon
                 icon={faCheck}
-                className={validName ? "valid" : "hide"}
+                className={validUsername ? "valid" : "hide"}
               />
               <FontAwesomeIcon
                 icon={faTimes}
-                className={validName || !user ? "hide" : "invalid"}
+                className={validUsername || !username ? "hide" : "invalid"}
               />
             </label>
             <input
               type="text"
               id="username"
-              ref={userRef}
+              // ref={userRef}
               autoComplete="off"
-              onChange={(e) => setUser(e.target.value)}
-              value={user}
+              onChange={(e) => setUsername(e.target.value)}
+              value={username}
               required
-              aria-invalid={validName ? "false" : "true"}
+              aria-invalid={validUsername ? "false" : "true"}
               aria-describedby="uidnote"
-              onFocus={() => setUserFocus(true)}
-              onBlur={() => setUserFocus(false)}
+              onFocus={() => setUsernameFocus(true)}
+              onBlur={() => setUsernameFocus(false)}
             />
             <p
               id="uidnote"
               className={
-                userFocus && user && !validName ? "instructions" : "offscreen"
+                usernameFocus && username && !validUsername
+                  ? "instructions"
+                  : "offscreen"
               }
             >
               <FontAwesomeIcon icon={faInfoCircle} />
@@ -217,7 +273,9 @@ const Register = () => {
             </p>
 
             <button
-              disabled={!validName || !validPwd || !validMatch ? true : false}
+              disabled={
+                !validUsername || !validPwd || !validMatch ? true : false
+              }
             >
               Sign Up
             </button>

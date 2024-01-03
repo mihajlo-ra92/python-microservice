@@ -6,7 +6,7 @@ import axios from "../api/axios";
 const LOGIN_URL = "/auth/login";
 
 const Login = () => {
-  const { setAuth } = useAuth();
+  const { setAuth, login } = useAuth();
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -44,6 +44,7 @@ const Login = () => {
       localStorage.setItem("token", accessToken);
       const role = response?.data?.user_type;
       console.log({ user, pwd, role, accessToken });
+      login();
       setAuth({ user, pwd, role, accessToken });
       setUser("");
       setPwd("");
