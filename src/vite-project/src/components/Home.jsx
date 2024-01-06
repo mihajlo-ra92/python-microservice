@@ -33,33 +33,24 @@ const Home = () => {
         <ul>
           {data.map((item) => (
             <li key={item.id}>
+              {/* <strong>ID:</strong> {item.id}
+                <br /> */}
+              <strong>Job Name:</strong>{" "}
               <Link to={`/job/${item.id}`} style={{ textDecoration: "none" }}>
-                <div className="job-details">
-                  <div className="text-content">
-                    <strong>Job Name:</strong> {item.job_name}
-                    <br />
-                    <strong>Employer ID:</strong> {item.employer_id}
-                    <br />
-                    <strong>Worker ID:</strong>{" "}
-                    {item.worker_id ? item.worker_id : "N/A"}
-                    <br />
-                    <strong>Job Description:</strong> {item.job_desc}
-                    <br />
-                    <strong>Pay in Euro:</strong> {item.pay_in_euro}
-                    <br />
-                    <strong>Completed:</strong> {item.completed ? "Yes" : "No"}
-                    <br />
-                  </div>
-                  <div className="job-image">
-                    <img
-                      src={
-                        "https://www.offidocs.com/imageswebp/100x100pxicon.jpg.webp"
-                      }
-                      alt={`Job ${item.id}`}
-                    />
-                    <hr />
-                  </div>
-                </div>
+                {item.job_name}
+                <br />
+                <strong>Employer ID:</strong> {item.employer_id}
+                <br />
+                <strong>Worker ID:</strong>{" "}
+                {item.worker_id ? item.worker_id : "N/A"}
+                <br />
+                <strong>Job Description:</strong> {item.job_desc}
+                <br />
+                <strong>Pay in Euro:</strong> {item.pay_in_euro}
+                <br />
+                <strong>Completed:</strong> {item.completed ? "Yes" : "No"}
+                <br />
+                <hr />
               </Link>
             </li>
           ))}
