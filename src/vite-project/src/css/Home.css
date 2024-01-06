@@ -1,0 +1,42 @@
+.container {
+  max-width: 800px; /* Set your preferred max-width */
+  margin: 0 auto; /* Center the container horizontally */
+}
+
+li {
+  list-style: none;
+  margin-bottom: 20px;
+  padding: 15px;
+  border: 1px solid #ccc;
+  color: black;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  transition: background-color 0.3s ease;
+
+  &:hover {
+    background-color: #e0e0e0;
+  }
+}
+
+strong {
+  margin-right: 5px;
+}
+
+p {
+  font-size: 18px;
+  font-weight: bold;
+  text-align: center;
+}
+
+ul {
+  padding: 0;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+a:visited {
+  color: inherit;
+}
