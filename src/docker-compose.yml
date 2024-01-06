@@ -47,7 +47,7 @@ services:
       - jaeger
 
   mysql:
-    image: mysql:5.7
+    image: mysql:8.0.31
     restart: always
     environment:
       MYSQL_DATABASE: "db"

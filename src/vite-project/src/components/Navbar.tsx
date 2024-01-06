@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import homeIcon from "../assets/logo-no-background-300px.svg";
-import "./Navbar.css";
+import "../css/Navbar.css";
 import useAuth from "../hooks/useAuth";
 
 const Navbar: React.FC = () => {

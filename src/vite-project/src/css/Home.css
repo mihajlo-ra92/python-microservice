@@ -1,0 +1,63 @@
+.container {
+  max-width: 800px; /* Set your preferred max-width */
+  margin: 0 auto; /* Center the container horizontally */
+}
+
+li {
+  list-style: none;
+  margin-bottom: 20px;
+  padding: 15px;
+  border: 1px solid #ccc;
+  color: black;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  transition: background-color 0.3s ease;
+  display: flex; /* Use flexbox for layout */
+
+  &:hover {
+    background-color: #e0e0e0;
+  }
+}
+.job-details {
+  flex: 1; /* Allow the job details to take the available width */
+  display: flex;
+  justify-content: space-between; /* Space between job details and image */
+}
+
+.text-content {
+  width: 70%; /* Adjust the width as needed */
+}
+
+.job-image {
+  width: 30%; /* Adjust the width as needed */
+  text-align: right;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px; /* Optional: Add rounded corners to the image */
+}
+
+strong {
+  margin-right: 5px;
+}
+
+p {
+  font-size: 18px;
+  font-weight: bold;
+  text-align: center;
+}
+
+ul {
+  padding: 0;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+a:visited {
+  color: inherit;
+}

@@ -1,6 +1,7 @@
 import os, uuid, json
 from flask import request
 from job_model import Job
+from flask_cors import CORS
 from typing import Optional, Union
 
 from job_utils import read_job, set_logger_config, set_start
@@ -11,6 +12,7 @@ set_logger_config()
 # TODO: Implement read all jobs for employer
 # and read all jobs for worker
 
+CORS(app,origins="*", supports_credentials="*")
 
 @app.route("/jobs/init-test")
 def init_test_db():
