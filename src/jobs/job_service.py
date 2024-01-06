@@ -11,8 +11,56 @@ class JobService(object):
         self.logger = logger
         self.repo = JobRepo(mysql, logger)
 
-    def read_all(self) -> list[Job]:
-        return self.repo.read_all()
+    def read_all(self) -> Union[Exception, list[Job]]:
+        jobs:list[Job] = self.repo.read_all()
+        for job in jobs:
+            try:
+                reqEmployer = requests.get(
+                    "http://users:5000/users/read-by-id-safe",
+                    json={"id": job.employer_id},
+                )
+                self.logger.info(f"recived reqEmployer json: {reqEmployer.json()}")
+                job.employer = reqEmployer.json()
+
+                if job.worker_id != None and job.worker_id != "":
+                    reqWorker = requests.get(
+                        "http://users:5000/users/read-by-id-safe",
+                        json={"id": job.worker_id},
+                    )
+                    self.logger.info(f"recived reqWorker json: {reqWorker.json()}")
+                    job.worker = reqWorker.json()
+
+            except Exception as ex:
+                self.logger.error("Error retriving data from user service")
+                self.logger.error(ex)
+                return MyException("Error retriving data from user service")
+        return jobs
+
+    def read_open(self) -> Union[Exception, list[Job]]:
+        jobs:list[Job] = self.repo.read_all()
+        for job in jobs:
+            try:
+                reqEmployer = requests.get(
+                    "http://users:5000/users/read-by-id-safe",
+                    json={"id": job.employer_id},
+                )
+                self.logger.info(f"recived reqEmployer json: {reqEmployer.json()}")
+                job.employer = reqEmployer.json()
+
+                if job.worker_id != None and job.worker_id != "":
+                    reqWorker = requests.get(
+                        "http://users:5000/users/read-by-id-safe",
+                        json={"id": job.worker_id},
+                    )
+                    self.logger.info(f"recived reqWorker json: {reqWorker.json()}")
+                    job.worker = reqWorker.json()
+
+            except Exception as ex:
+                self.logger.error("Error retriving data from user service")
+                self.logger.error(ex)
+                return MyException("Error retriving data from user service")
+        return jobs
+
 
     def read_by_id(self, job_id: str) -> Optional[Job]:
         read_job = self.repo.read_by_id(job_id)

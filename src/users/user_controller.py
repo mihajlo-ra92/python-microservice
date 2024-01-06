@@ -29,7 +29,8 @@ trace.get_tracer_provider().add_span_processor(span_processor)
 set_logger_config()
 [app, mysql, logger, service] = set_start()
 
-CORS(app,origins="*", supports_credentials="*")
+CORS(app, origins="*", supports_credentials="*")
+
 
 @app.route("/users/init-test")
 def init_test_db():
@@ -172,7 +173,9 @@ def check_info():
         if jwt_data == "Password invalid":
             return json.dumps({"message": jwt_data}), 401
         span.set_status(Status(StatusCode.OK))
-        return json.dumps({"username": jwt_data[0], "user_type": jwt_data[1],"user_id":jwt_data[2]})
+        return json.dumps(
+            {"username": jwt_data[0], "user_type": jwt_data[1], "user_id": jwt_data[2]}
+        )
 
 
 if __name__ == "__main__":

@@ -15,7 +15,9 @@ class Job(object):
     ):
         self.id: str = id
         self.employer_id: str = employer_id
+        self.employer = None
         self.worker_id: str = worker_id
+        self.worker = None
         self.job_name: str = job_name
         self.job_desc: str = job_desc
         self.pay_in_euro: float = pay_in_euro

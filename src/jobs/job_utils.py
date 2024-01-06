@@ -65,3 +65,7 @@ def read_job(json: any) -> Job:
     except Exception:
         job.id = ""
     return job
+
+
+def serialize_job(obj):
+    return obj.__dict__

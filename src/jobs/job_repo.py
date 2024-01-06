@@ -20,6 +20,13 @@ class JobRepo(object):
         )
         return zip_data(cur)
 
+    def read_open(self) -> list[Job]:
+        cur = self.mysql.connection.cursor()
+        cur.execute(
+            f"SELECT * FROM Jobs, WHERE worker_id IS NULL OR worker_id = ''"
+        )
+        return zip_data(cur)
+
     def read_by_id(self, job_id) -> Optional[Job]:
         cur = self.mysql.connection.cursor()
         cur.execute(f"SELECT * FROM Jobs WHERE id='{job_id}';")
@@ -74,12 +81,25 @@ class JobRepo(object):
         return True
 
 
-def zip_data(cur) -> list[Job]:
-    row_headers = [x[0] for x in cur.description]
-    retVal = cur.fetchall()
-    cur.close()
-    json_data = []
-    for result in retVal:
-        json_data.append(dict(zip(row_headers, result)))
-    jobs: list[Job] = json_data
-    return jobs
+# def zip_data(cur) -> list[Job]:
+#     row_headers = [x[0] for x in cur.description]
+#     retVal = cur.fetchall()
+#     cur.close()
+#     json_data = []
+#     for result in retVal:
+#         json_data.append(dict(zip(row_headers, result)))
+#     jobs: list[Job] = json_data
+#     return jobs
+
+def zip_data( cur) -> list[Job]:
+        row_headers = [x[0] for x in cur.description]
+        result_set = cur.fetchall()
+        cur.close()
+
+        jobs = []
+        for result in result_set:
+            job_data = dict(zip(row_headers, result))
+            job = Job(**job_data) 
+            jobs.append(job)
+
+        return jobs

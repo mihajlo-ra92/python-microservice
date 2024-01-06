@@ -1,59 +1,29 @@
-import os, uuid, json
+import json
 from flask import request
 from job_model import Job
 from flask_cors import CORS
 from typing import Optional, Union
 
-from job_utils import read_job, set_logger_config, set_start
+from job_utils import read_job, set_logger_config, set_start, serialize_job
 
 set_logger_config()
 [app, mysql, logger, service] = set_start()
 
-# TODO: Implement read all jobs for employer
-# and read all jobs for worker
-
-CORS(app,origins="*", supports_credentials="*")
-
-@app.route("/jobs/init-test")
-def init_test_db():
-    if os.environ.get("TEST") == "TRUE":
-        cur = mysql.connection.cursor()
-        cur.execute("DELETE FROM Jobs;")
-        cur.execute(
-            "INSERT INTO Jobs (id, employer_id, worker_id,\
-        job_name, job_desc, pay_in_euro, completed)\
-        VALUES ('job1','employer1', 'worker1', 'name1', 'desc1', 1.0, true),\
-        ('job2','employer1', 'worker2', 'name2', 'desc2', 2.0, false),\
-        ('job3','employer2', 'worker1', 'name3', 'desc3', 3.0, true),\
-        ('job4','employer2', 'worker2', 'name4', 'desc4', 4.0, true),\
-        ('job5','employer1', NULL, 'name5', 'desc5', 5.0, false);"
-        )
-        mysql.connection.commit()
-        users_db_test = os.environ.get("MYSQL_DB_USERS") + "_test"
-        logger.info(f"usersDB: {users_db_test}")
-        cur.execute(f"USE {users_db_test}")
-        cur.execute("DELETE FROM Users;")
-        cur.execute(
-            "INSERT INTO Users (id, username, password, email, \
-        user_type) VALUES ('employer1',\
-        'emp_us_1', '123', 'test1@gmail.com', 'EMPLOYER'),\
-        ('worker1',\
-        'test2', '123', 'test2@gmail.com', 'WORKER'), \
-        ('33333333-b392-11ed-92c6-0242ac170004',\
-        'test3', '123', 'test3@gmail.com', 'ADMIN');"
-        )
-        jobs_db_test = os.environ.get("MYSQL_DB_JOBS") + "_test"
-        logger.info(f"jobsDB: {jobs_db_test}")
-        cur.execute(f"USE {jobs_db_test}")
-        mysql.connection.commit()
-        cur.close()
-    return ""
-
+CORS(app, origins="*", supports_credentials="*")
 
 @app.route("/jobs/read-all", methods=["GET"])
 def read_jobs():
-    jobs: list[Job] = service.read_all()
-    return json.dumps(jobs), 200
+    retVal: Union[Exception, list[Job]] = service.read_all()
+    if isinstance(retVal, Exception):
+        return json.dumps({"message": str(retVal)}), 400
+    return json.dumps(retVal, default=serialize_job), 200
+
+@app.route("/jobs/read-open", methods=["GET"])
+def read_open():
+    retVal: Union[Exception, list[Job]] = service.read_open()
+    if isinstance(retVal, Exception):
+        return json.dumps({"message": str(retVal)}), 400
+    return json.dumps(retVal, default=serialize_job), 200
 
 
 @app.route("/jobs/read-by-id", methods=["GET"])

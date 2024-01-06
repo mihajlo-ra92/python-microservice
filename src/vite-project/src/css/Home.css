@@ -1,6 +1,6 @@
 .container {
-  max-width: 800px; /* Set your preferred max-width */
-  margin: 0 auto; /* Center the container horizontally */
+  max-width: 800px;
+  margin: 0 auto;
 }
 
 li {
@@ -39,4 +39,8 @@ a {
 
 a:visited {
   color: inherit;
+}
+
+.employer-username {
+  color: #009459;
 }
