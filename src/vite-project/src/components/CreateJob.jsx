@@ -8,6 +8,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import axios from "../api/axios";
 import { Link } from "react-router-dom";
 import "../css/CreateJob.css";
+import { jwtDecode } from "jwt-decode";
 
 const NAME_REGEX = /^[a-zA-Z0-9]{3,30}$/;
 const DESCRIPTION_REGEX = /^.{5,400}$/;
@@ -32,6 +33,9 @@ const CreateJob = () => {
 
   const [errMsg, setErrMsg] = useState("");
   const [success, setSuccess] = useState(false);
+
+  const token = localStorage.getItem("token");
+  const decodedToken = token ? jwtDecode(token) : null;
 
   useEffect(() => {
     jobRef.current.focus();
@@ -63,7 +67,7 @@ const CreateJob = () => {
       const response = await axios.post(
         CREATE_URL,
         JSON.stringify({
-          employer_id: "TODO: Read from localstorage",
+          employer_id: decodedToken.user_id,
           job_name: name,
           job_desc: description,
           pay_in_euro: pay,
@@ -73,7 +77,6 @@ const CreateJob = () => {
           withCredentials: true,
         }
       );
-      console.log(JSON.stringify(response?.data));
       setSuccess(true);
       setName("");
       setDescription("");
@@ -191,7 +194,7 @@ const CreateJob = () => {
             </p>
 
             <label htmlFor="pay">
-              Password:
+              Pay in EUR:
               <FontAwesomeIcon
                 icon={faCheck}
                 className={validPay ? "valid" : "hide"}

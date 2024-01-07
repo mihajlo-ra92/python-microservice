@@ -55,6 +55,21 @@ def set_logger_config():
 def read_job(json: any) -> Job:
     job = Job()
     job.employer_id = json["employer_id"]
+    # job.worker_id = json["worker_id"]
+    job.job_name = json["job_name"]
+    job.job_desc = json["job_desc"]
+    job.pay_in_euro = json["pay_in_euro"]
+    job.completed = False
+    # job.completed = json["completed"]
+    # try:
+    #     job.id = json["id"]
+    # except Exception:
+    #     job.id = ""
+    return job
+
+def read_job_update(json: any) -> Job:
+    job = Job()
+    job.employer_id = json["employer_id"]
     job.worker_id = json["worker_id"]
     job.job_name = json["job_name"]
     job.job_desc = json["job_desc"]
@@ -65,7 +80,6 @@ def read_job(json: any) -> Job:
     except Exception:
         job.id = ""
     return job
-
 
 def serialize_job(obj):
     return obj.__dict__

@@ -39,11 +39,9 @@ const Login = () => {
           withCredentials: true,
         }
       );
-      console.log(JSON.stringify(response?.data));
       const accessToken = response?.data?.Bearer;
       localStorage.setItem("token", accessToken);
       const role = response?.data?.user_type;
-      console.log({ user, pwd, role, accessToken });
       login();
       setAuth({ user, pwd, role, accessToken });
       setUser("");

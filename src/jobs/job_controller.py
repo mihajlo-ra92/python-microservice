@@ -4,7 +4,7 @@ from job_model import Job
 from flask_cors import CORS
 from typing import Optional, Union
 
-from job_utils import read_job, set_logger_config, set_start, serialize_job
+from job_utils import read_job,read_job_update, set_logger_config, set_start, serialize_job
 
 set_logger_config()
 [app, mysql, logger, service] = set_start()
@@ -57,7 +57,7 @@ def create_job():
 @app.route("/jobs/update", methods=["PUT"])
 def update_job():
     try:
-        sent_job: Job = read_job(request.json)
+        sent_job: Job = read_job_update(request.json)
     except Exception as ex:
         logger.info(ex)
         return json.dumps({"message": "Please send all user data"}), 400

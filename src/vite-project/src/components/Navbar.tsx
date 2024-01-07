@@ -15,12 +15,16 @@ const Navbar: React.FC = () => {
         </Link>
       </div>
       <div className="right-options">
-        <a href="#">About</a>
+        <a href="/create-job">Post Job</a>
+        <a />
         <a href="#">Services</a>
+        <a />
         {!isLoggedIn && <a href="/register">Register</a>}
+        <a />
         {!isLoggedIn && <a href="/login">Login</a>}
+        <a />
         {isLoggedIn && (
-          <a href="#" onClick={logout}>
+          <a href="/" onClick={logout}>
             Logout
           </a>
         )}
