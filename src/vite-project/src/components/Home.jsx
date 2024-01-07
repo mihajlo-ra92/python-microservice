@@ -32,26 +32,27 @@ const Home = () => {
       ) : (
         <ul>
           {data.map((item) => (
-            <li key={item.id}>
-              <strong>Job Name:</strong>{" "}
+            <div key={item.id}>
               <Link to={`/job/${item.id}`} style={{ textDecoration: "none" }}>
-                {item.job_name}
-                <br />
-                <strong>Employer:</strong>
-                <Link
-                  to={`/user/${item.employer_id}`}
-                  style={{ textDecoration: "none" }}
-                >
-                  <span className="employer-username">
-                    {item.employer.username}
-                  </span>
-                </Link>
-                <br />
-                <strong>Pay in Euro:</strong> {item.pay_in_euro}
-                <br />
-                <hr />
+                <li>
+                  <strong>Job Name:</strong> {item.job_name}
+                  <br />
+                  <strong>Employer:</strong>
+                  <Link
+                    to={`/user/${item.employer_id}`}
+                    style={{ textDecoration: "none" }}
+                  >
+                    <span className="employer-username">
+                      {item.employer.username}
+                    </span>
+                  </Link>
+                  <br />
+                  <strong>Pay in Euro:</strong> {item.pay_in_euro}
+                  <br />
+                  <hr />
+                </li>
               </Link>
-            </li>
+            </div>
           ))}
         </ul>
       )}

@@ -23,7 +23,7 @@ class JobRepo(object):
     def read_open(self) -> list[Job]:
         cur = self.mysql.connection.cursor()
         cur.execute(
-            f"SELECT * FROM Jobs, WHERE worker_id IS NULL OR worker_id = ''"
+            f"SELECT * FROM Jobs WHERE worker_id IS NULL OR worker_id = ''"
         )
         return zip_data(cur)
 

@@ -26,18 +26,12 @@ def read_open():
     return json.dumps(retVal, default=serialize_job), 200
 
 
-@app.route("/jobs/read-by-id", methods=["GET"])
-def read_by_id():
-    sent_job = request.json
-    try:
-        job_id = sent_job["id"]
-    except Exception as ex:
-        logger.info(ex)
-        return json.dumps({"message": "Please send id"}), 400
-    job: Optional[Job] = service.read_by_id(job_id)
-    if job == None:
-        return json.dumps({"message": "Invalid job_id"})
-    return json.dumps(job), 200
+@app.route("/jobs/read-by-id/<uuid:job_id>", methods=["GET"])
+def read_by_id(job_id):
+    retVal: Optional[Job] = service.read_by_id(job_id)
+    if isinstance(retVal, Exception):
+        return json.dumps({"message": str(retVal)})
+    return json.dumps(retVal, default=serialize_job), 200
 
 
 @app.route("/jobs/create", methods=["POST"])
@@ -48,9 +42,9 @@ def create_job():
         logger.info(ex)
         return json.dumps({"message": "Please send all job data"}), 400
     retVal: Union[Exception, Job] = service.create(sent_job)
-    if isinstance(retVal, Job):
-        return retVal.toJSON(), 201
-    return json.dumps({"message": str(retVal)}), 400
+    if isinstance(retVal, Exception):
+        return json.dumps({"message": str(retVal)}), 400
+    return retVal.toJSON(), 201
 
 
 @app.route("/jobs/update", methods=["PUT"])

@@ -37,7 +37,7 @@ class JobService(object):
         return jobs
 
     def read_open(self) -> Union[Exception, list[Job]]:
-        jobs:list[Job] = self.repo.read_all()
+        jobs:list[Job] = self.repo.read_open()
         for job in jobs:
             try:
                 reqEmployer = requests.get(
@@ -62,9 +62,31 @@ class JobService(object):
         return jobs
 
 
-    def read_by_id(self, job_id: str) -> Optional[Job]:
-        read_job = self.repo.read_by_id(job_id)
-        return read_job
+    def read_by_id(self, job_id: str) -> Union[Exception,Job]:
+        job: Optional[Job] = self.repo.read_by_id(job_id)
+        if job is None:
+            return MyException("Falied to retrive job")
+        try:
+            reqEmployer = requests.get(
+                "http://users:5000/users/read-by-id-safe",
+                json={"id": job.employer_id},
+            )
+            self.logger.info(f"recived reqEmployer json: {reqEmployer.json()}")
+            job.employer = reqEmployer.json()
+
+            if job.worker_id != None and job.worker_id != "":
+                reqWorker = requests.get(
+                    "http://users:5000/users/read-by-id-safe",
+                    json={"id": job.worker_id},
+                )
+                self.logger.info(f"recived reqWorker json: {reqWorker.json()}")
+                job.worker = reqWorker.json()
+
+        except Exception as ex:
+            self.logger.error("Error retriving data from user service")
+            self.logger.error(ex)
+            return MyException("Error retriving data from user service")
+        return job
 
     def read_by_employer_id(self, employer_id: str) -> list[Job]:
         return self.repo.read_by_employer_id(employer_id)
