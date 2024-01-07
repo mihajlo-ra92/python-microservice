@@ -39,7 +39,7 @@ const Home = () => {
                   <br />
                   <strong>Employer:</strong>
                   <Link
-                    to={`/user/${item.employer_id}`}
+                    to={`/user/${item.employer.username}`}
                     style={{ textDecoration: "none" }}
                   >
                     <span className="employer-username">

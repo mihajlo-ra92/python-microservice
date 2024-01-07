@@ -37,7 +37,7 @@ const Job = () => {
         <div>
           <h1>{data.job_name}</h1>
           <Link
-            to={`/user/${data.employer_id}`}
+            to={`/user/${data.employer.username}`}
             style={{ textDecoration: "none" }}
           >
             <p>

@@ -17,14 +17,15 @@ body {
   background-color: #d4d4ff;
 }
 
-.App {
+/* .App {
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   min-height: 100vh;
   padding: 1rem 0.5rem;
-}
+  align-items: center;
+} */
 
 section {
   width: 100%;
@@ -51,6 +52,7 @@ a:visited {
 } */
 
 input[type="text"],
+input[type="number"],
 input[type="password"],
 button,
 textarea {

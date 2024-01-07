@@ -100,13 +100,8 @@ def read_logged_user(user_data):
     return json.dumps(user), 200
 
 
-@app.route("/users/read-by-username", methods=["GET"])
-def read_by_username():
-    try:
-        username = request.json["username"]
-    except Exception as inst:
-        logger.info(inst)
-        return json.dumps({"message": "Please send username"}), 400
+@app.route("/users/read-by-username/<string:username>", methods=["GET"])
+def read_by_username(username):
     user: User = service.read_by_username(username)
     if user == None:
         return json.dumps({"message": "Invalid username"}), 400

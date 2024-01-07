@@ -36,7 +36,9 @@ class JobRepo(object):
         return None
 
     def read_by_employer_id(self, employer_id) -> list[Job]:
-        pass
+        cur = self.mysql.connection.cursor()
+        cur.execute(f"SELECT * FROM Jobs WHERE employer_id='{employer_id}';")
+        return zip_data(cur)
 
     def read_by_worker_id(self, worker_id) -> list[Job]:
         pass

@@ -33,6 +33,13 @@ def read_by_id(job_id):
         return json.dumps({"message": str(retVal)})
     return json.dumps(retVal, default=serialize_job), 200
 
+@app.route("/jobs/read-by-employer-id/<uuid:employer_id>", methods=["GET"])
+def read_by_employer_id(employer_id):
+    retVal: Union[Exception, list[Job]] = service.read_by_employer_id(employer_id)
+    if isinstance(retVal, Exception):
+        return json.dumps({"message": str(retVal)}), 400
+    return json.dumps(retVal, default=serialize_job), 200
+
 
 @app.route("/jobs/create", methods=["POST"])
 def create_job():
