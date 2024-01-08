@@ -2,19 +2,20 @@ import { useEffect, useState } from "react";
 import axios from "../api/axios";
 import "../css/Job.css";
 import { Link, useParams } from "react-router-dom";
+import { jwtDecode } from "jwt-decode";
 
 const GET_JOB_URL = "jobs/read-by-id";
 
 const Job = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userType, setUserType] = useState("");
   const { jobId } = useParams();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        console.log("jobId");
-        console.log(jobId);
         const response = await axios.get(`${GET_JOB_URL}/${jobId}`);
         console.log(JSON.stringify(response.data));
         setData(response.data);
@@ -26,7 +27,12 @@ const Job = () => {
     };
 
     fetchData();
-    // NOTE: I added jobId only because the linter told me so
+    const token = localStorage.getItem("token");
+    if (token) {
+      setIsAuthenticated(true);
+      const decodedToken = jwtDecode(token);
+      setUserType(decodedToken.user_type);
+    }
   }, [jobId]);
 
   return (
@@ -52,6 +58,19 @@ const Job = () => {
           </p>
           <p>Pay in Euro: {data.pay_in_euro}</p>
           <p>Completed: {data.completed ? "Yes" : "No"}</p>
+          <Link to={`/job/apply/${jobId}`}>
+            <button
+              className="apply-button"
+              disabled={!isAuthenticated || userType !== "WORKER"}
+            >
+              Apply for Job
+              <span className="tooltip-text">
+                {isAuthenticated && userType !== "WORKER"
+                  ? "Log in as a worker to apply"
+                  : ""}
+              </span>
+            </button>
+          </Link>
         </div>
       )}
     </div>

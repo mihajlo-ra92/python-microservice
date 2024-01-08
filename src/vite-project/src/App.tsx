@@ -36,7 +36,7 @@ function App() {
           <Route path="/job/:jobId" element={<Job />} />
           <Route path="/user/:username" element={<User />} />
           <Route path="create-job" element={<CreateJob />} />
-          <Route path="apply-job" element={<ApplyJob />} />
+          <Route path="/job/apply/:jobId" element={<ApplyJob />} />
           {/* we want to protect these routes */}
 
           <Route element={<RequireAuth allowedRoles={[ROLES.Employer]} />}>

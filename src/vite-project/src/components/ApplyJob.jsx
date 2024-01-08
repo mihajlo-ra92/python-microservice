@@ -6,11 +6,10 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import axios from "../api/axios";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import "../css/CreateJob.css";
 import { jwtDecode } from "jwt-decode";
 
-const NAME_REGEX = /^[a-zA-Z0-9]{3,30}$/;
 const DESCRIPTION_REGEX = /^.{5,400}$/;
 
 const APPLY_URL = "/applications/create";
@@ -19,17 +18,9 @@ const ApplyJob = () => {
   const jobRef = useRef();
   const errRef = useRef();
 
-  const [name, setName] = useState("");
-  const [validName, setValidName] = useState(false);
-  const [nameFocus, setNameFocus] = useState(false);
-
   const [description, setDescription] = useState("");
   const [validDescription, setValidDescription] = useState(false);
   const [descriptionFocus, setDescriptionFocus] = useState(false);
-
-  const [pay, setPay] = useState(0);
-  const [validPay, setValidPay] = useState(false);
-  const [payFocus, setPayFocus] = useState(false);
 
   const [errMsg, setErrMsg] = useState("");
   const [success, setSuccess] = useState(false);
@@ -37,29 +28,19 @@ const ApplyJob = () => {
   const token = localStorage.getItem("token");
   const decodedToken = token ? jwtDecode(token) : null;
 
+  const { jobId } = useParams();
+
   useEffect(() => {
     jobRef.current.focus();
   }, []);
 
   useEffect(() => {
-    setValidName(NAME_REGEX.test(name));
-  }, [name]);
-
-  useEffect(() => {
     setValidDescription(DESCRIPTION_REGEX.test(description));
   }, [description]);
 
-  useEffect(() => {
-    setValidPay(pay > 0);
-  }, [pay]);
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // if button enabled with JS hack
-    const v1 = NAME_REGEX.test(name);
-    const v2 = DESCRIPTION_REGEX.test(description);
-    const v3 = pay > 0;
-    if (!v1 || !v2 || !v3) {
+    if (!DESCRIPTION_REGEX.test(description)) {
       setErrMsg("Invalid Entry");
       return;
     }
@@ -67,10 +48,9 @@ const ApplyJob = () => {
       const response = await axios.post(
         APPLY_URL,
         JSON.stringify({
-          job_id: "e30fe517-e758-4030-9934-cf9ad6349d27",
-          worker_id: "e30fe517-e758-4030-9934-cf9ad6349d27",
+          job_id: jobId,
+          worker_id: decodedToken.user_id,
           description: description,
-          pay_in_euro: pay,
         }),
         {
           headers: { "Content-Type": "application/json" },
@@ -79,9 +59,7 @@ const ApplyJob = () => {
       );
       console.log(response);
       setSuccess(true);
-      setName("");
       setDescription("");
-      setPay(0);
     } catch (err) {
       console.log(err.response.data.message);
       if (err.response.data.message) {
@@ -116,47 +94,9 @@ const ApplyJob = () => {
           >
             {errMsg}
           </p>
-          <h1>Create Job</h1>
+          <h1>Apply to Job</h1>
           <form onSubmit={handleSubmit}>
-            {/* EMAIL */}
-
-            <label htmlFor="name">
-              Name:
-              <FontAwesomeIcon
-                icon={faCheck}
-                className={validName ? "valid" : "hide"}
-              />
-              <FontAwesomeIcon
-                icon={faTimes}
-                className={validName || !name ? "hide" : "invalid"}
-              />
-            </label>
-
-            <input
-              type="text"
-              id="name"
-              ref={jobRef}
-              autoComplete="off"
-              onChange={(e) => setName(e.target.value)}
-              value={name}
-              required
-              aria-invalid={validName ? "false" : "true"}
-              aria-describedby="uidnote"
-              onFocus={() => setNameFocus(true)}
-              onBlur={() => setNameFocus(false)}
-            />
-
-            <p
-              id="uidnote"
-              className={
-                nameFocus && name && !validName ? "instructions" : "offscreen"
-              }
-            >
-              <FontAwesomeIcon icon={faInfoCircle} />
-              Must be valid job name
-            </p>
-
-            {/* USERNAME */}
+            {/* DESCRIPTION */}
             <label htmlFor="description">
               Description:
               <FontAwesomeIcon
@@ -170,12 +110,13 @@ const ApplyJob = () => {
                 }
               />
             </label>
-            <input
-              type="text"
+            <textarea
               id="description"
+              ref={jobRef}
               autoComplete="off"
               onChange={(e) => setDescription(e.target.value)}
               value={description}
+              rows={10}
               required
               aria-invalid={validDescription ? "false" : "true"}
               aria-describedby="uidnote"
@@ -194,51 +135,8 @@ const ApplyJob = () => {
               Must be valid description
             </p>
 
-            <label htmlFor="pay">
-              Pay in EUR:
-              <FontAwesomeIcon
-                icon={faCheck}
-                className={validPay ? "valid" : "hide"}
-              />
-              <FontAwesomeIcon
-                icon={faTimes}
-                className={validPay || !pay ? "hide" : "invalid"}
-              />
-            </label>
-            <input
-              type="number"
-              id="pay"
-              onChange={(e) => setPay(e.target.value)}
-              value={pay}
-              required
-              aria-invalid={validPay ? "false" : "true"}
-              aria-describedby="pwdnote"
-              onFocus={() => setPayFocus(true)}
-              onBlur={() => setPayFocus(false)}
-            />
-            <p
-              id="pwdnote"
-              className={payFocus && !validPay ? "instructions" : "offscreen"}
-            >
-              <FontAwesomeIcon icon={faInfoCircle} />
-              Must be valid pay
-            </p>
-
-            <button
-              disabled={
-                !validName || !validPay || !validDescription ? true : false
-              }
-            >
-              Create
-            </button>
+            <button disabled={!validDescription ? true : false}>Apply</button>
           </form>
-          {/* <p>
-            Already registered?
-            <br />
-            <span className="line">
-              <Link to="/">Sign In</Link>
-            </span>
-          </p> */}
         </section>
       )}
     </>

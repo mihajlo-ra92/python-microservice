@@ -29,10 +29,10 @@ CREATE DATABASE applications_db;
 USE applications_db;
 
 CREATE TABLE Applications (
-id VARCHAR(255) PRIMARY KEY,
-worker_id VARCHAR(30) NOT NULL,
-job_id VARCHAR(30) NOT NULL,
-description VARCHAR(255) NOT NULL
+id VARCHAR(60) PRIMARY KEY,
+worker_id VARCHAR(60) NOT NULL,
+job_id VARCHAR(60) NOT NULL,
+description VARCHAR(500) NOT NULL
 );
 
 CREATE DATABASE users_db_test;
@@ -64,8 +64,8 @@ CREATE DATABASE applications_db_test;
 USE applications_db_test;
 
 CREATE TABLE Applications (
-id VARCHAR(255) PRIMARY KEY,
-worker_id VARCHAR(30) NOT NULL,
-job_id VARCHAR(30) NOT NULL,
-description VARCHAR(255) NOT NULL
+id VARCHAR(60) PRIMARY KEY,
+worker_id VARCHAR(60) NOT NULL,
+job_id VARCHAR(60) NOT NULL,
+description VARCHAR(500) NOT NULL
 );

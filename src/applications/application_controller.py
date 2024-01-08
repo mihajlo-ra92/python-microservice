@@ -67,12 +67,6 @@ def create():
     logger.info(request)
     logger.info("json")
     logger.info(request.json)
-    logger.info("worker_id")
-    logger.info(request.json["worker_id"])
-    logger.info("job_id")
-    logger.info(request.json["job_id"])
-    logger.info("description")
-    logger.info(request.json["description"])
     try:
         sent_application: Application = read_application(request.json)
     except Exception as ex:
