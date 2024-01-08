@@ -10,10 +10,10 @@ import Lounge from "./components/Longue";
 import LinkPage from "./components/LinkPage";
 import RequireAuth from "./components/RequireAuth";
 import { Routes, Route } from "react-router-dom";
-import Navbar from "./components/Navbar";
 import Job from "./components/Job";
 import User from "./components/User";
 import CreateJob from "./components/CreateJob";
+import ApplyJob from "./components/ApplyJob";
 
 const ROLES = {
   Employer: "EMPLOYER",
@@ -36,6 +36,7 @@ function App() {
           <Route path="/job/:jobId" element={<Job />} />
           <Route path="/user/:username" element={<User />} />
           <Route path="create-job" element={<CreateJob />} />
+          <Route path="apply-job" element={<ApplyJob />} />
           {/* we want to protect these routes */}
 
           <Route element={<RequireAuth allowedRoles={[ROLES.Employer]} />}>

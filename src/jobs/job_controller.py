@@ -4,12 +4,19 @@ from job_model import Job
 from flask_cors import CORS
 from typing import Optional, Union
 
-from job_utils import read_job,read_job_update, set_logger_config, set_start, serialize_job
+from job_utils import (
+    read_job,
+    read_job_update,
+    set_logger_config,
+    set_start,
+    serialize_job,
+)
 
 set_logger_config()
 [app, mysql, logger, service] = set_start()
 
 CORS(app, origins="*", supports_credentials="*")
+
 
 @app.route("/jobs/read-all", methods=["GET"])
 def read_jobs():
@@ -17,6 +24,7 @@ def read_jobs():
     if isinstance(retVal, Exception):
         return json.dumps({"message": str(retVal)}), 400
     return json.dumps(retVal, default=serialize_job), 200
+
 
 @app.route("/jobs/read-open", methods=["GET"])
 def read_open():
@@ -32,6 +40,7 @@ def read_by_id(job_id):
     if isinstance(retVal, Exception):
         return json.dumps({"message": str(retVal)})
     return json.dumps(retVal, default=serialize_job), 200
+
 
 @app.route("/jobs/read-by-employer-id/<uuid:employer_id>", methods=["GET"])
 def read_by_employer_id(employer_id):

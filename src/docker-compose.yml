@@ -17,6 +17,23 @@ services:
       - traefik
       - jaeger
 
+  applications:
+    build: ./applications
+    restart: always
+    labels:
+      - "traefik.http.routers.applications.rule=(Host(`app.localhost`) && PathPrefix(`/applications`))"
+    environment:
+      MYSQL_HOST: mysql
+      MYSQL_USER: root
+      MYSQL_PASSWORD: password
+      OTEL_SERVICE_NAME: application
+    env_file:
+      - global.env
+    depends_on:
+      - mysql
+      - traefik
+      - jaeger
+
   jobs:
     build: ./jobs
     restart: always

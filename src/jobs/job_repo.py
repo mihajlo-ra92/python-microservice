@@ -22,9 +22,7 @@ class JobRepo(object):
 
     def read_open(self) -> list[Job]:
         cur = self.mysql.connection.cursor()
-        cur.execute(
-            f"SELECT * FROM Jobs WHERE worker_id IS NULL OR worker_id = ''"
-        )
+        cur.execute(f"SELECT * FROM Jobs WHERE worker_id IS NULL OR worker_id = ''")
         return zip_data(cur)
 
     def read_by_id(self, job_id) -> Optional[Job]:
@@ -93,15 +91,16 @@ class JobRepo(object):
 #     jobs: list[Job] = json_data
 #     return jobs
 
-def zip_data( cur) -> list[Job]:
-        row_headers = [x[0] for x in cur.description]
-        result_set = cur.fetchall()
-        cur.close()
 
-        jobs = []
-        for result in result_set:
-            job_data = dict(zip(row_headers, result))
-            job = Job(**job_data) 
-            jobs.append(job)
+def zip_data(cur) -> list[Job]:
+    row_headers = [x[0] for x in cur.description]
+    result_set = cur.fetchall()
+    cur.close()
 
-        return jobs
+    jobs = []
+    for result in result_set:
+        job_data = dict(zip(row_headers, result))
+        job = Job(**job_data)
+        jobs.append(job)
+
+    return jobs

@@ -12,7 +12,7 @@ class JobService(object):
         self.repo = JobRepo(mysql, logger)
 
     def read_all(self) -> Union[Exception, list[Job]]:
-        jobs:list[Job] = self.repo.read_all()
+        jobs: list[Job] = self.repo.read_all()
         for job in jobs:
             try:
                 reqEmployer = requests.get(
@@ -37,7 +37,7 @@ class JobService(object):
         return jobs
 
     def read_open(self) -> Union[Exception, list[Job]]:
-        jobs:list[Job] = self.repo.read_open()
+        jobs: list[Job] = self.repo.read_open()
         # TODO: create separate function
         for job in jobs:
             try:
@@ -62,8 +62,7 @@ class JobService(object):
                 return MyException("Error retriving data from user service")
         return jobs
 
-
-    def read_by_id(self, job_id: str) -> Union[Exception,Job]:
+    def read_by_id(self, job_id: str) -> Union[Exception, Job]:
         job: Optional[Job] = self.repo.read_by_id(job_id)
         if job is None:
             return MyException("Falied to retrive job")
@@ -89,7 +88,7 @@ class JobService(object):
             return MyException("Error retriving data from user service")
         return job
 
-    def read_by_employer_id(self, employer_id: str) -> Union[Exception,list[Job]]:
+    def read_by_employer_id(self, employer_id: str) -> Union[Exception, list[Job]]:
         jobs: list[Job] = self.repo.read_by_employer_id(employer_id)
         # TODO: create separate function
         for job in jobs:
