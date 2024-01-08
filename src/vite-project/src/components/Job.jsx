@@ -63,12 +63,15 @@ const Job = () => {
               className="apply-button"
               disabled={!isAuthenticated || userType !== "WORKER"}
             >
-              Apply for Job
-              <span className="tooltip-text">
-                {isAuthenticated && userType !== "WORKER"
-                  ? "Log in as a worker to apply"
-                  : ""}
-              </span>
+              Apply
+              {isAuthenticated && ["EMPLOYER", "ADMIN"].includes(userType) && (
+                <span className="tooltip-text">
+                  Only workers can apply to jobs
+                </span>
+              )}
+              {!isAuthenticated && (
+                <span className="tooltip-text">Log in to apply</span>
+              )}
             </button>
           </Link>
         </div>

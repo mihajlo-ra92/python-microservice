@@ -3,7 +3,6 @@ import Login from "./components/Login";
 import Home from "./components/Home";
 import Layout from "./components/Layout";
 import Editor from "./components/Editor";
-import Admin from "./components/Admin";
 import Missing from "./components/Missing";
 import Unauthorized from "./components/Unauthorized";
 import Lounge from "./components/Longue";
@@ -36,15 +35,11 @@ function App() {
           <Route path="/job/:jobId" element={<Job />} />
           <Route path="/user/:username" element={<User />} />
           <Route path="create-job" element={<CreateJob />} />
-          <Route path="/job/apply/:jobId" element={<ApplyJob />} />
           {/* we want to protect these routes */}
 
-          <Route element={<RequireAuth allowedRoles={[ROLES.Employer]} />}>
+          <Route element={<RequireAuth allowedRoles={["WORKER"]} />}>
+            <Route path="/job/apply/:jobId" element={<ApplyJob />} />
             <Route path="editor" element={<Editor />} />
-          </Route>
-
-          <Route element={<RequireAuth allowedRoles={[ROLES.Employer]} />}>
-            <Route path="admin" element={<Admin />} />
           </Route>
 
           <Route
