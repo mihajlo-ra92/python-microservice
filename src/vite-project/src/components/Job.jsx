@@ -63,7 +63,7 @@ const Job = () => {
               className="apply-button"
               disabled={!isAuthenticated || userType !== "WORKER"}
             >
-              Apply
+              Apply to Job
               {isAuthenticated && ["EMPLOYER", "ADMIN"].includes(userType) && (
                 <span className="tooltip-text">
                   Only workers can apply to jobs

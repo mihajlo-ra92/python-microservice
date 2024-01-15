@@ -6,7 +6,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import axios from "../api/axios";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import "../css/CreateJob.css";
 import { jwtDecode } from "jwt-decode";
 
@@ -15,6 +15,7 @@ const DESCRIPTION_REGEX = /^.{5,400}$/;
 const APPLY_URL = "/applications/create";
 
 const ApplyJob = () => {
+  const navigate = useNavigate();
   const jobRef = useRef();
   const errRef = useRef();
 
@@ -60,6 +61,7 @@ const ApplyJob = () => {
       console.log(response);
       setSuccess(true);
       setDescription("");
+      navigate("/");
     } catch (err) {
       console.log(err.response.data.message);
       if (err.response.data.message) {

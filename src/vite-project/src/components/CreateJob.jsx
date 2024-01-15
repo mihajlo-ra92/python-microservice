@@ -6,7 +6,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import axios from "../api/axios";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import "../css/CreateJob.css";
 import { jwtDecode } from "jwt-decode";
 
@@ -16,6 +16,7 @@ const DESCRIPTION_REGEX = /^.{5,400}$/;
 const CREATE_URL = "/jobs/create";
 
 const CreateJob = () => {
+  const navigate = useNavigate();
   const jobRef = useRef();
   const errRef = useRef();
 
@@ -81,6 +82,7 @@ const CreateJob = () => {
       setName("");
       setDescription("");
       setPay(0);
+      navigate("/");
     } catch (err) {
       console.log(err.response.data.message);
       if (err.response.data.message) {
@@ -231,13 +233,6 @@ const CreateJob = () => {
               Create
             </button>
           </form>
-          {/* <p>
-            Already registered?
-            <br />
-            <span className="line">
-              <Link to="/">Sign In</Link>
-            </span>
-          </p> */}
         </section>
       )}
     </>

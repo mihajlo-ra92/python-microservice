@@ -1,23 +1,35 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from enum import Enum
 import json
+from datetime import datetime
 
 
-class Application(object):
-    def __init__(
-        self,
-        id: str = "",
-        worker_id: str = "",
-        job_id: str = "",
-        description: str = "",
-        # TODO: Implement created_at
-    ):
-        self.id: str = id
-        self.worker_id: str = worker_id
-        self.job_id: str = job_id
-        self.description: str = description
+class ApplicationStatus(Enum):
+    PENDING = "PENDING"
+    APPROVED = "APPROVED"
+    REJECTED = "REJECTED"
+
+
+@dataclass
+class Application:
+    id: str = ""
+    worker_id: str = ""
+    worker = None
+    job_id: str = ""
+    job = None
+    description: str = ""
+    status: ApplicationStatus = ApplicationStatus.PENDING
+    created_at: datetime = field(default_factory=datetime.now)
 
     def toJSON(self):
-        return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)
+        return json.dumps(self, default=self._json_default, sort_keys=True, indent=4)
+
+    def _json_default(self, obj):
+        if isinstance(obj, datetime):
+            return obj.isoformat()
+        if isinstance(obj, Enum):
+            return obj.name
+        raise TypeError("Type not serializable")
 
 
 @dataclass

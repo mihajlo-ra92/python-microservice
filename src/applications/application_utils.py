@@ -1,3 +1,5 @@
+from datetime import datetime
+from enum import Enum
 from functools import wraps
 import json, os, jwt
 from logging import Logger
@@ -78,3 +80,11 @@ def read_application(json: any) -> Application:
     application.job_id = json["job_id"]
     application.description = json["description"]
     return application
+
+
+def serialize_job(obj):
+    if isinstance(obj, datetime):
+        return obj.isoformat()
+    if isinstance(obj, Enum):
+        return obj.value
+    return obj.__dict__

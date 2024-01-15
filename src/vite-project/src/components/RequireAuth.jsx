@@ -3,14 +3,14 @@ import { jwtDecode } from "jwt-decode";
 import useAuth from "../hooks/useAuth";
 
 const RequireAuth = ({ allowedRoles }) => {
-  const { auth } = useAuth();
+  const { isLoggedIn } = useAuth();
   const location = useLocation();
   const token = localStorage.getItem("token");
   const decodedToken = token ? jwtDecode(token) : null;
 
   return allowedRoles.includes(decodedToken?.user_type) ? (
     <Outlet />
-  ) : auth?.user ? (
+  ) : isLoggedIn ? (
     <Navigate to="/unauthorized" state={{ from: location }} replace />
   ) : (
     <Navigate to="/login" state={{ from: location }} replace />

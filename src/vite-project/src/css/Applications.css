@@ -1,12 +1,7 @@
-.user-container {
-  max-width: 600px;
-  margin: auto;
-  /* margin-top: 3%; */
-  padding: 20px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  background-color: #fff;
+.applications-container {
+  max-width: 800px;
+  margin: 0 auto;
+  margin-top: 3%;
 }
 
 .jobs-container {

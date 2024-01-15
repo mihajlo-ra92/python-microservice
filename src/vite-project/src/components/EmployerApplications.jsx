@@ -6,7 +6,7 @@ import { Link, useParams } from "react-router-dom";
 const GET_USER_URL = "users/read-by-username";
 const GET_JOBS_URL = "jobs/read-by-employer-id";
 
-const User = () => {
+const EmployerApplications = () => {
   const [userData, setUserData] = useState([]);
   const [jobsData, setJobsData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -133,4 +133,4 @@ const User = () => {
   );
 };
 
-export default User;
+export default EmployerApplications;

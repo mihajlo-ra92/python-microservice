@@ -5,6 +5,7 @@ from flask_cors import CORS
 from application_model import Application, UserData
 from application_utils import (
     read_application,
+    serialize_job,
     set_logger_config,
     set_start,
     token_required,
@@ -47,10 +48,10 @@ def read_by_id(application_id: str):
 
 @app.route("/applications/read-by-worker-id/<uuid:worker_id>", methods=["GET"])
 def read_by_worker_id(worker_id: str):
-    application: Application = service.read_by_worker_id(worker_id)
-    if application == None:
+    applications: list[Application] = service.read_by_worker_id(worker_id)
+    if applications == None:
         return json.dumps({"message": "No application found for sent worker_id"}), 404
-    return json.dumps(application), 200
+    return json.dumps(applications, default=serialize_job), 200
 
 
 @app.route("/applications/read-by-job-id/<uuid:job_id>", methods=["GET"])
@@ -69,13 +70,17 @@ def create():
     logger.info(request.json)
     try:
         sent_application: Application = read_application(request.json)
+        logger.info("sent_application")
+        logger.info(sent_application)
     except Exception as ex:
         logger.info(ex)
         return json.dumps({"message": "Please send all application data"}), 400
     retVal: Union[Exception, Application] = service.create(sent_application)
+    logger.info("created")
+    logger.info(retVal)
     if isinstance(retVal, Exception):
         return json.dumps({"message": str(retVal)}), 400
-    return retVal.toJSON(), 201
+    return json.dumps(retVal, default=serialize_job), 201
 
 
 def get_header_from_flask_request(request, key):

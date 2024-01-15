@@ -8,7 +8,7 @@ import { jwtDecode } from "jwt-decode";
 const Navbar: React.FC = () => {
   const { isLoggedIn, logout } = useAuth();
 
-  const getUserType = () => {
+  const getLoggedUser = () => {
     const token = localStorage.getItem("token");
     if (token) {
       try {
@@ -19,7 +19,7 @@ const Navbar: React.FC = () => {
           exp: number;
         } = jwtDecode(token);
         if (decoded && decoded.user_type) {
-          return decoded.user_type;
+          return decoded;
         }
       } catch (error) {
         console.error("Error decoding JWT:", error);
@@ -28,7 +28,7 @@ const Navbar: React.FC = () => {
     return null;
   };
 
-  const userType = getUserType();
+  const loggedUser = getLoggedUser();
   return (
     <div className="navbar">
       <div className="left-options">
@@ -37,18 +37,39 @@ const Navbar: React.FC = () => {
         </Link>
       </div>
       <div className="right-options">
-        {userType === "EMPLOYER" && <a href="/create-job">Post Job</a>}
-        <a />
-        <a href="#">Services</a>
-        <a />
-        {!isLoggedIn && <a href="/register">Register</a>}
-        <a />
-        {!isLoggedIn && <a href="/login">Login</a>}
-        <a />
+        {loggedUser?.user_type === "EMPLOYER" && (
+          <>
+            <a href="/create-job">Post Job</a>
+            <a />
+            <a href={`/employer/applications/${loggedUser!.user_id}`}>
+              Applications
+            </a>
+          </>
+        )}
+
+        {loggedUser?.user_type === "WORKER" && (
+          <>
+            <a href={`/worker/applications/${loggedUser!.user_id}`}>
+              Applications
+            </a>
+          </>
+        )}
         {isLoggedIn && (
-          <a href="/" onClick={logout}>
-            Logout
-          </a>
+          <>
+            <a href={`/user/${loggedUser!.username}`}>My Profile</a>
+            <a />
+            <a href="/" onClick={logout}>
+              Logout
+            </a>
+          </>
+        )}
+        {!isLoggedIn && (
+          <>
+            {" "}
+            <a href="/register">Register</a>
+            <a />
+            <a href="/login">Login</a>
+          </>
         )}
       </div>
     </div>
