@@ -3,18 +3,20 @@ import axios from "../api/axios";
 import "../css/Applications.css";
 import { Link, useParams } from "react-router-dom";
 
-const GET_APPLICATIONS_URL = "/applications/read-by-worker-id/";
+const GET_APPLICATIONS_URL = "/applications/read-by-worker-id";
 
 const WorkerApplications = () => {
   const [applicationsData, setApplicationsData] = useState([]);
   const [loading, setLoading] = useState(true);
-  const { workerId } = useParams();
+  const { employerId } = useParams();
+  console.log("worker");
 
   useEffect(() => {
     const fetchData = async () => {
       try {
+        console.log(`${GET_APPLICATIONS_URL}/${employerId}`);
         const responseApplications = await axios.get(
-          `${GET_APPLICATIONS_URL}/${workerId}`
+          `${GET_APPLICATIONS_URL}/${employerId}`
         );
         console.log(JSON.stringify(responseApplications.data));
         setApplicationsData(responseApplications.data);
@@ -26,7 +28,7 @@ const WorkerApplications = () => {
     };
 
     fetchData();
-  }, [workerId]);
+  }, [employerId]);
 
   return (
     <>

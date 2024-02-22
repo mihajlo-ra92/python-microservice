@@ -53,6 +53,13 @@ def read_by_worker_id(worker_id: str):
         return json.dumps({"message": "No application found for sent worker_id"}), 404
     return json.dumps(applications, default=serialize_job), 200
 
+@app.route("/applications/read-by-employer-id/<uuid:employer_id>", methods=["GET"])
+def read_by_employer_id(employer_id: str):
+    applications: list[Application] = service.read_by_employer_id(employer_id)
+    if applications == None:
+        return json.dumps({"message": "No application found for sent employer_id"}), 404
+    return json.dumps(applications, default=serialize_job), 200
+
 
 @app.route("/applications/read-by-job-id/<uuid:job_id>", methods=["GET"])
 def read_by_job_id(job_id: str):

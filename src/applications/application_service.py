@@ -54,6 +54,35 @@ class ApplicationService(object):
                 return MyException("Error retriving data from application service")
         return applications
 
+    def read_by_employer_id(self, employer_id: str) -> list[Application]:
+        applications: list[Application] = []
+        self.logger.info("URL")
+        self.logger.info(
+            "http://jobs:5000/jobs/read-by-employer-id/" + str(employer_id)
+        )
+        reqJobs = requests.get(
+            "http://jobs:5000/jobs/read-by-employer-id/" + str(employer_id),
+        )
+        self.logger.info(f"recived reqJobs json: {reqJobs}")
+        jobs: list[dict] = reqJobs.json()
+        self.logger.info(f"jobs casted to any: {jobs}")
+        for job in jobs:
+            job_applications = self.repo.read_by_job_id(job["id"])
+            self.logger.info(f"job_applications: {job_applications}")
+            for job_application in job_applications:
+                job_application.job = job
+                reqWorker = requests.get(
+                    "http://users:5000/users/read-by-id-safe",
+                    json={"id": job_application.worker_id},
+                )
+                self.logger.info(f"recived reqWorker json: {reqWorker.json()}")
+                job_application.worker = reqWorker.json()
+                applications.append(job_application)
+                self.logger.info("appended")
+
+        self.logger.info(f"all applications: {applications}")
+        return applications
+
     def read_by_job_id(self, job_id: str) -> list[Application]:
         return self.repo.read_by_job_id(job_id)
 

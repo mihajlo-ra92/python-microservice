@@ -12,6 +12,7 @@ import User from "./components/User";
 import CreateJob from "./components/CreateJob";
 import ApplyJob from "./components/ApplyJob";
 import WorkerApplications from "./components/WorkerApplications";
+import EmployerApplications from "./components/EmployerApplications";
 
 const ROLES = {
   Employer: "EMPLOYER",
@@ -46,7 +47,7 @@ function App() {
             <Route path="create-job" element={<CreateJob />} />
             <Route
               path="/employer/applications/:employerId"
-              element={<WorkerApplications />}
+              element={<EmployerApplications />}
             />
           </Route>
 
