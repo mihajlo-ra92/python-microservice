@@ -10,6 +10,11 @@ class ApplicationStatus(Enum):
     REJECTED = "REJECTED"
 
 
+class ApplicationDecision(Enum):
+    ACCEPT = "ACCEPT"
+    REJECT = "REJECT"
+
+
 @dataclass
 class Application:
     id: str = ""

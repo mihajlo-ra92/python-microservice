@@ -3,7 +3,7 @@ import requests
 from typing import Optional, Union
 from application_repo import ApplicationRepo
 from flask_mysqldb import MySQL
-from application_model import MyException, Application, UserData
+from application_model import ApplicationDecision, MyException, Application, UserData
 from opentelemetry import trace
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import (
@@ -82,6 +82,17 @@ class ApplicationService(object):
 
         self.logger.info(f"all applications: {applications}")
         return applications
+
+    def decide(
+        self, application_id: str, decision: ApplicationDecision
+    ) -> Optional[Application]:
+        if decision == ApplicationDecision.REJECT:
+            self.repo.reject_by_id(application_id)
+        if decision == ApplicationDecision.ACCEPT:
+            # TODO Implement accept
+            raise MyException("Accept not implelemted")
+            self.repo.reject_by_id(application_id)
+        return self.repo.read_by_id(application_id)
 
     def read_by_job_id(self, job_id: str) -> list[Application]:
         return self.repo.read_by_job_id(job_id)

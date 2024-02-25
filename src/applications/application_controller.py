@@ -5,6 +5,7 @@ from flask_cors import CORS
 from application_model import Application, UserData
 from application_utils import (
     read_application,
+    read_decision,
     serialize_job,
     set_logger_config,
     set_start,
@@ -53,6 +54,7 @@ def read_by_worker_id(worker_id: str):
         return json.dumps({"message": "No application found for sent worker_id"}), 404
     return json.dumps(applications, default=serialize_job), 200
 
+
 @app.route("/applications/read-by-employer-id/<uuid:employer_id>", methods=["GET"])
 def read_by_employer_id(employer_id: str):
     applications: list[Application] = service.read_by_employer_id(employer_id)
@@ -67,6 +69,20 @@ def read_by_job_id(job_id: str):
     if application == None:
         return json.dumps({"message": "No application found for sent job_id"}), 404
     return json.dumps(application), 200
+
+
+@app.route("/applications/decide/<uuid:application_id>", methods=["POST"])
+def decide(application_id: str):
+    application: Application = service.read_by_id(application_id)
+    if application == None:
+        return json.dumps({"message": "Invalid application_id"}), 400
+    try:
+        sent_decision: Application = read_decision(request.get_json())
+        updated_application = service.decide(application_id, sent_decision)
+    except Exception as ex:
+        logger.info(ex)
+        return json.dumps({"message": "Please send all application data"}), 400
+    return json.dumps(updated_application, default=serialize_job), 200
 
 
 @app.route("/applications/create", methods=["POST"])

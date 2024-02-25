@@ -60,7 +60,13 @@ class ApplicationRepo(object):
         cur.close()
         return application
 
-    # TODO: Implement update
+    def reject_by_id(self, application_id):
+        cur = self.mysql.connection.cursor()
+        cur.execute(
+            f"UPDATE Applications SET status = 'REJECTED' WHERE id='{application_id}';"
+        )
+        self.mysql.connection.commit()
+        cur.close()
 
     def delete_by_id(self, application_id: str) -> bool:
         cur = self.mysql.connection.cursor()

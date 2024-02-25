@@ -6,7 +6,7 @@ from logging import Logger
 from logging.config import dictConfig
 from flask import Flask, request
 from flask_mysqldb import MySQL
-from application_model import Application, UserData
+from application_model import Application, UserData, ApplicationDecision
 from application_service import ApplicationService
 
 SECRET_KEY = os.environ.get("SECRET_KEY")
@@ -80,6 +80,15 @@ def read_application(json: any) -> Application:
     application.job_id = json["job_id"]
     application.description = json["description"]
     return application
+
+
+def read_decision(json: any) -> ApplicationDecision:
+    decision: ApplicationDecision = None
+    if json["decision"] == "ACCEPT":  # TODO: Update to use enum, not string
+        decision = ApplicationDecision.ACCEPT
+    if json["decision"] == "REJECT":  # TODO: Update to use enum, not string
+        decision = ApplicationDecision.REJECT
+    return decision
 
 
 def serialize_job(obj):

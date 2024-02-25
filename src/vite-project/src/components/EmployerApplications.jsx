@@ -4,6 +4,7 @@ import "../css/Applications.css";
 import { Link, useParams } from "react-router-dom";
 
 const GET_APPLICATIONS_URL = "/applications/read-by-employer-id";
+const DECIDE_APPLICATION_URL = "/applications/decide";
 
 const EmployerApplications = () => {
   const [applicationsData, setApplicationsData] = useState([]);
@@ -29,6 +30,24 @@ const EmployerApplications = () => {
     fetchData();
   }, [employerId]);
 
+  const handleDecide = async (applicationId, decision) => {
+    try {
+      const response = await axios.post(
+        `${DECIDE_APPLICATION_URL}/${applicationId}`,
+        JSON.stringify({
+          decision,
+        }),
+        {
+          headers: { "Content-Type": "application/json" },
+          withCredentials: true,
+        }
+      );
+      console.log(response);
+    } catch (error) {
+      console.error("Error accepting application:", error);
+    }
+  };
+
   return (
     <>
       <div className="applications-container">
@@ -51,22 +70,16 @@ const EmployerApplications = () => {
                     <br />
                     <strong>Job:</strong> {item.job.job_name}
                     <br />
-                    {/* <strong>Employer:</strong>
-                    <Link
-                      to={`/user/${item.job.employer.username}`}
-                      style={{ textDecoration: "none" }}
-                    >
-                      <span className="employer-username">
-                        {item.job.employer.username}
-                      </span>
-                    </Link>
-                    <br /> */}
                     <strong>Pay in Euro:</strong> {item.job.pay_in_euro}
                     <br />
-                    {/* <strong>Completed: </strong>
-                    {item.completed ? "Yes" : "No"} */}
-                    <br />
-                    <hr />
+                    <Link>
+                      <button onClick={() => handleDecide(item.id, "ACCEPT")}>
+                        Accept
+                      </button>
+                      <button onClick={() => handleDecide(item.id, "REJECT")}>
+                        Reject
+                      </button>
+                    </Link>
                   </li>
                 </Link>
               </div>
