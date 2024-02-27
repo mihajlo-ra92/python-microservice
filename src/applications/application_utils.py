@@ -84,10 +84,10 @@ def read_application(json: any) -> Application:
 
 def read_decision(json: any) -> ApplicationDecision:
     decision: ApplicationDecision = None
-    if json["decision"] == "ACCEPT":  # TODO: Update to use enum, not string
-        decision = ApplicationDecision.ACCEPT
-    if json["decision"] == "REJECT":  # TODO: Update to use enum, not string
-        decision = ApplicationDecision.REJECT
+    if json["decision"] == ApplicationDecision.APPROVED.value:
+        decision = ApplicationDecision.APPROVED
+    if json["decision"] == ApplicationDecision.REJECTED.value:
+        decision = ApplicationDecision.REJECTED
     return decision
 
 

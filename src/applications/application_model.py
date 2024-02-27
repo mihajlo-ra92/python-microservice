@@ -11,8 +11,8 @@ class ApplicationStatus(Enum):
 
 
 class ApplicationDecision(Enum):
-    ACCEPT = "ACCEPT"
-    REJECT = "REJECT"
+    APPROVED = "APPROVED"
+    REJECTED = "REJECTED"
 
 
 @dataclass

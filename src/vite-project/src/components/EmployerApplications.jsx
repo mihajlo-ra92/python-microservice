@@ -43,6 +43,10 @@ const EmployerApplications = () => {
         }
       );
       console.log(response);
+      const updatedResponseApplications = await axios.get(
+        `${GET_APPLICATIONS_URL}/${employerId}`
+      );
+      setApplicationsData(updatedResponseApplications.data);
     } catch (error) {
       console.error("Error accepting application:", error);
     }
@@ -72,14 +76,20 @@ const EmployerApplications = () => {
                     <br />
                     <strong>Pay in Euro:</strong> {item.job.pay_in_euro}
                     <br />
-                    <Link>
-                      <button onClick={() => handleDecide(item.id, "ACCEPT")}>
-                        Accept
-                      </button>
-                      <button onClick={() => handleDecide(item.id, "REJECT")}>
-                        Reject
-                      </button>
-                    </Link>
+                    {item.status === "PENDING" && (
+                      <Link>
+                        <button
+                          onClick={() => handleDecide(item.id, "APPROVED")}
+                        >
+                          Accept
+                        </button>
+                        <button
+                          onClick={() => handleDecide(item.id, "REJECTED")}
+                        >
+                          Reject
+                        </button>
+                      </Link>
+                    )}
                   </li>
                 </Link>
               </div>

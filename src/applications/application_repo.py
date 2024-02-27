@@ -68,6 +68,22 @@ class ApplicationRepo(object):
         self.mysql.connection.commit()
         cur.close()
 
+    def approve_by_id(self, application_id):
+        cur = self.mysql.connection.cursor()
+        cur.execute(
+            f"UPDATE Applications SET status = 'APPROVED' WHERE id='{application_id}';"
+        )
+        self.mysql.connection.commit()
+        cur.close()
+
+    def reject_others(self, application_id, job_id):
+        cur = self.mysql.connection.cursor()
+        cur.execute(
+            f"UPDATE Applications SET status = 'REJECTED' WHERE id !='{application_id}' AND job_id='{job_id}';"
+        )
+        self.mysql.connection.commit()
+        cur.close()
+
     def delete_by_id(self, application_id: str) -> bool:
         cur = self.mysql.connection.cursor()
         cur.execute(f"DELETE FROM Applications WHERE id='{application_id}';")

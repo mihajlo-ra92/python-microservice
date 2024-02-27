@@ -86,12 +86,17 @@ class ApplicationService(object):
     def decide(
         self, application_id: str, decision: ApplicationDecision
     ) -> Optional[Application]:
-        if decision == ApplicationDecision.REJECT:
+        application = self.repo.read_by_id(application_id)
+        if application.status != "PENDING":
+            raise MyException("Application is not pending.")
+        if decision == ApplicationDecision.REJECTED:
             self.repo.reject_by_id(application_id)
-        if decision == ApplicationDecision.ACCEPT:
-            # TODO Implement accept
-            raise MyException("Accept not implelemted")
-            self.repo.reject_by_id(application_id)
+        if decision == ApplicationDecision.APPROVED:
+            self.logger.info("approving")
+            self.repo.approve_by_id(application_id)
+            self.logger.info("rejecting others")
+            self.repo.reject_others(application_id, application.job_id)
+            self.logger.info("rejected others")
         return self.repo.read_by_id(application_id)
 
     def read_by_job_id(self, job_id: str) -> list[Application]:
