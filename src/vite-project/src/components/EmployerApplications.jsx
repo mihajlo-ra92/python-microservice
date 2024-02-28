@@ -5,6 +5,7 @@ import { Link, useParams } from "react-router-dom";
 
 const GET_APPLICATIONS_URL = "/applications/read-by-employer-id";
 const DECIDE_APPLICATION_URL = "/applications/decide";
+const COMPLETE_JOB_URL = "/jobs/complete";
 
 const EmployerApplications = () => {
   const [applicationsData, setApplicationsData] = useState([]);
@@ -48,7 +49,23 @@ const EmployerApplications = () => {
       );
       setApplicationsData(updatedResponseApplications.data);
     } catch (error) {
-      console.error("Error accepting application:", error);
+      console.error("Error deciding on application:", error);
+    }
+  };
+
+  const handleComplete = async (jobId) => {
+    try {
+      const response = await axios.post(`${COMPLETE_JOB_URL}/${jobId}`, {
+        headers: { "Content-Type": "application/json" },
+        withCredentials: true,
+      });
+      console.log(response);
+      const updatedResponseApplications = await axios.get(
+        `${GET_APPLICATIONS_URL}/${employerId}`
+      );
+      setApplicationsData(updatedResponseApplications.data);
+    } catch (error) {
+      console.error("Error completing application:", error);
     }
   };
 
@@ -76,20 +93,28 @@ const EmployerApplications = () => {
                     <br />
                     <strong>Pay in Euro:</strong> {item.job.pay_in_euro}
                     <br />
-                    {item.status === "PENDING" && (
-                      <Link>
-                        <button
-                          onClick={() => handleDecide(item.id, "APPROVED")}
-                        >
-                          Accept
-                        </button>
-                        <button
-                          onClick={() => handleDecide(item.id, "REJECTED")}
-                        >
-                          Reject
-                        </button>
-                      </Link>
-                    )}
+                    <Link>
+                      {item.status === "PENDING" && (
+                        <>
+                          <button
+                            onClick={() => handleDecide(item.id, "APPROVED")}
+                          >
+                            Accept
+                          </button>
+                          <button
+                            onClick={() => handleDecide(item.id, "REJECTED")}
+                          >
+                            Reject
+                          </button>
+                        </>
+                      )}
+                      {item.status === "APPROVED" &&
+                        item.job.completed === 0 && (
+                          <button onClick={() => handleComplete(item.job_id)}>
+                            Complete
+                          </button>
+                        )}
+                    </Link>
                   </li>
                 </Link>
               </div>

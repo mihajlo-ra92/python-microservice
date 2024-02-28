@@ -131,6 +131,10 @@ class JobService(object):
 
         return self.repo.create(job)
 
+    def complete(self, job_id: str) -> Union[Exception, Job]:
+        self.repo.complete(job_id)
+        return self.repo.read_by_id(job_id)
+
     def update(self, job: Job) -> Union[Exception, Job]:
         self.logger.info(f"sent job: {job.toJSON()}")
         job_to_be_changed: Job = self.repo.read_by_id(job.id)

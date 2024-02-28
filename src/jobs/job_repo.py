@@ -60,6 +60,16 @@ class JobRepo(object):
         job.completed = False
         return job
 
+    def complete(self, job_id):
+        cur = self.mysql.connection.cursor()
+        cur.execute(
+            f"UPDATE Jobs\
+            SET completed=1\
+            WHERE id='{job_id}';"
+        )
+        self.mysql.connection.commit()
+        cur.close()
+
     def update(self, job: Job) -> Job:
         cur = self.mysql.connection.cursor()
         cur.execute(

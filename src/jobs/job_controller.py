@@ -50,6 +50,14 @@ def read_by_employer_id(employer_id):
     return json.dumps(retVal, default=serialize_job), 200
 
 
+@app.route("/jobs/complete/<uuid:job_id>", methods=["POST"])
+def complete(job_id):
+    retVal: Optional[Job] = service.complete(job_id)
+    if isinstance(retVal, Exception):
+        return json.dumps({"message": str(retVal)})
+    return json.dumps(retVal, default=serialize_job), 200
+
+
 @app.route("/jobs/create", methods=["POST"])
 def create_job():
     try:
