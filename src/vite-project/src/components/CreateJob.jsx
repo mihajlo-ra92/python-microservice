@@ -6,11 +6,11 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import axios from "../api/axios";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import "../css/CreateJob.css";
 import { jwtDecode } from "jwt-decode";
 
-const NAME_REGEX = /^[a-zA-Z0-9]{3,30}$/;
+const NAME_REGEX = /^[a-zA-Z0-9\s]{3,30}$/;
 const DESCRIPTION_REGEX = /^.{5,400}$/;
 
 const CREATE_URL = "/jobs/create";
@@ -56,7 +56,6 @@ const CreateJob = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // if button enabled with JS hack
     const v1 = NAME_REGEX.test(name);
     const v2 = DESCRIPTION_REGEX.test(description);
     const v3 = pay > 0;
@@ -65,7 +64,7 @@ const CreateJob = () => {
       return;
     }
     try {
-      const response = await axios.post(
+      await axios.post(
         CREATE_URL,
         JSON.stringify({
           employer_id: decodedToken.user_id,

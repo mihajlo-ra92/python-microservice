@@ -8,15 +8,14 @@ const GET_APPLICATIONS_URL = "/applications/read-by-worker-id";
 const WorkerApplications = () => {
   const [applicationsData, setApplicationsData] = useState([]);
   const [loading, setLoading] = useState(true);
-  const { employerId } = useParams();
+  const { workerId } = useParams();
   console.log("worker");
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        console.log(`${GET_APPLICATIONS_URL}/${employerId}`);
         const responseApplications = await axios.get(
-          `${GET_APPLICATIONS_URL}/${employerId}`
+          `${GET_APPLICATIONS_URL}/${workerId}`
         );
         console.log(JSON.stringify(responseApplications.data));
         setApplicationsData(responseApplications.data);
@@ -28,7 +27,7 @@ const WorkerApplications = () => {
     };
 
     fetchData();
-  }, [employerId]);
+  }, [workerId]);
 
   return (
     <>
@@ -52,7 +51,7 @@ const WorkerApplications = () => {
                     <br />
                     <strong>Job:</strong> {item.job.job_name}
                     <br />
-                    {/* <strong>Employer:</strong>
+                    <strong>Employer:</strong>
                     <Link
                       to={`/user/${item.job.employer.username}`}
                       style={{ textDecoration: "none" }}
@@ -61,11 +60,11 @@ const WorkerApplications = () => {
                         {item.job.employer.username}
                       </span>
                     </Link>
-                    <br /> */}
+                    <br />
                     <strong>Pay in Euro:</strong> {item.job.pay_in_euro}
                     <br />
-                    {/* <strong>Completed: </strong>
-                    {item.completed ? "Yes" : "No"} */}
+                    <strong>Completed: </strong>
+                    {item.job.completed ? "Yes" : "No"}
                     <br />
                     <hr />
                   </li>

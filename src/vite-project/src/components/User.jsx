@@ -5,10 +5,12 @@ import { Link, useParams } from "react-router-dom";
 
 const GET_USER_URL = "users/read-by-username";
 const GET_JOBS_URL = "jobs/read-by-employer-id";
+const GET_FINISHED_JOBS_URL = "jobs/finished/read-by-worker-id";
 
 const User = () => {
   const [userData, setUserData] = useState([]);
   const [jobsData, setJobsData] = useState([]);
+  const [finishedJobsData, setFinishedJobsData] = useState([]);
   const [loading, setLoading] = useState(true);
   const { username } = useParams();
 
@@ -19,11 +21,18 @@ const User = () => {
         console.log(JSON.stringify(responseUser.data));
         setUserData(responseUser.data);
 
+        // if (responseUser.data.type === "EMPLOYER")
         const responseJobs = await axios.get(
           `${GET_JOBS_URL}/${responseUser.data.id}`
         );
         console.log(JSON.stringify(responseJobs.data));
         setJobsData(responseJobs.data);
+
+        // if (responseUser.data.type === "WORKER")
+        const responseFinishedJobs = await axios.get(
+          `${GET_FINISHED_JOBS_URL}/${responseUser.data.id}`
+        );
+        setFinishedJobsData(responseFinishedJobs.data);
         setLoading(false);
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -55,9 +64,6 @@ const User = () => {
             <p>
               <strong>Email:</strong> {userData.email}
             </p>
-            {/* <p>
-              <strong>User Type:</strong> {userData.user_type}
-            </p> */}
           </div>
         )}
       </div>
@@ -72,16 +78,6 @@ const User = () => {
                   <li>
                     <strong>Job Name:</strong> {item.job_name}
                     <br />
-                    {/* <strong>Employer:</strong>
-                    <Link
-                      to={`/user/${item.employer.username}`}
-                      style={{ textDecoration: "none" }}
-                    >
-                      <span className="employer-username">
-                        {item.employer.username}
-                      </span>
-                    </Link>
-                    <br /> */}
                     <strong>Pay in Euro:</strong> {item.pay_in_euro}
                     <br />
                     <strong>Completed: </strong>
@@ -95,10 +91,10 @@ const User = () => {
           </ul>
         </div>
       ) : userData.user_type === "WORKER" ? (
-        <div className="finished-jobs-container">
+        <div className="jobs-container">
           <ul>
             <h1>Finished Jobs</h1>
-            {jobsData.map((item) => (
+            {finishedJobsData.map((item) => (
               <div key={item.id}>
                 <Link to={`/job/${item.id}`} style={{ textDecoration: "none" }}>
                   <li>

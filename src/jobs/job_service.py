@@ -117,6 +117,31 @@ class JobService(object):
     def read_by_worker_id(self, worker_id: str) -> list[Job]:
         return self.repo.read_by_worker_id(worker_id)
 
+    def finished_read_by_worker_id(self, worker_id: str) -> Union[Exception, list[Job]]:
+        jobs: list[Job] = self.repo.finished_read_by_worker_id(worker_id)
+        for job in jobs:
+            try:
+                reqEmployer = requests.get(
+                    "http://users:5000/users/read-by-id-safe",
+                    json={"id": job.employer_id},
+                )
+                self.logger.info(f"recived reqEmployer json: {reqEmployer.json()}")
+                job.employer = reqEmployer.json()
+
+                if job.worker_id != None and job.worker_id != "":
+                    reqWorker = requests.get(
+                        "http://users:5000/users/read-by-id-safe",
+                        json={"id": job.worker_id},
+                    )
+                    self.logger.info(f"recived reqWorker json: {reqWorker.json()}")
+                    job.worker = reqWorker.json()
+
+            except Exception as ex:
+                self.logger.error("Error retriving data from user service")
+                self.logger.error(ex)
+                return MyException("Error retriving data from user service")
+        return jobs
+
     def create(self, job: Job) -> Union[Exception, Job]:
         req = requests.get(
             "http://users:5000/users/read-by-id-safe", json={"id": job.employer_id}
@@ -133,6 +158,12 @@ class JobService(object):
 
     def complete(self, job_id: str) -> Union[Exception, Job]:
         self.repo.complete(job_id)
+        return self.repo.read_by_id(job_id)
+
+    def assign_worker(self, job_id: str, worker_id: str) -> Union[Exception, Job]:
+        self.logger.info("service")
+        self.repo.assign_worker(job_id, worker_id)
+        self.logger.info("assigned")
         return self.repo.read_by_id(job_id)
 
     def update(self, job: Job) -> Union[Exception, Job]:

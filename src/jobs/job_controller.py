@@ -50,6 +50,24 @@ def read_by_employer_id(employer_id):
     return json.dumps(retVal, default=serialize_job), 200
 
 
+@app.route("/jobs/finished/read-by-worker-id/<uuid:worker_id>", methods=["GET"])
+def finished_read_by_worker_id(worker_id):
+    retVal: Union[Exception, list[Job]] = service.finished_read_by_worker_id(worker_id)
+    if isinstance(retVal, Exception):
+        return json.dumps({"message": str(retVal)}), 400
+    return json.dumps(retVal, default=serialize_job), 200
+
+
+@app.route("/jobs/assign-worker", methods=["POST"])
+def assign_user():
+    worker_id = request.json["worker_id"]
+    job_id = request.json["job_id"]
+    retVal: Optional[Job] = service.assign_worker(job_id, worker_id)
+    if isinstance(retVal, Exception):
+        return json.dumps({"message": str(retVal)})
+    return json.dumps(retVal, default=serialize_job), 200
+
+
 @app.route("/jobs/complete/<uuid:job_id>", methods=["POST"])
 def complete(job_id):
     retVal: Optional[Job] = service.complete(job_id)

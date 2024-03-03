@@ -94,6 +94,12 @@ class ApplicationService(object):
         if decision == ApplicationDecision.APPROVED:
             self.logger.info("approving")
             self.repo.approve_by_id(application_id)
+            self.logger.info("sending post")
+            requests.post(
+                "http://jobs:5000/jobs/assign-worker",
+                json={"job_id": application.job_id, "worker_id": application.worker_id},
+            )
+            self.logger.info("sent post")
             self.logger.info("rejecting others")
             self.repo.reject_others(application_id, application.job_id)
             self.logger.info("rejected others")

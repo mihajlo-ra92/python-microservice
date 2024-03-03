@@ -38,6 +38,13 @@ class JobRepo(object):
         cur.execute(f"SELECT * FROM Jobs WHERE employer_id='{employer_id}';")
         return zip_data(cur)
 
+    def finished_read_by_worker_id(self, worker_id) -> list[Job]:
+        cur = self.mysql.connection.cursor()
+        cur.execute(
+            f"SELECT * FROM Jobs WHERE worker_id='{worker_id}' AND completed = 1;"
+        )
+        return zip_data(cur)
+
     def read_by_worker_id(self, worker_id) -> list[Job]:
         pass
 
@@ -65,6 +72,16 @@ class JobRepo(object):
         cur.execute(
             f"UPDATE Jobs\
             SET completed=1\
+            WHERE id='{job_id}';"
+        )
+        self.mysql.connection.commit()
+        cur.close()
+
+    def assign_worker(self, job_id, worker_id):
+        cur = self.mysql.connection.cursor()
+        cur.execute(
+            f"UPDATE Jobs\
+            SET worker_id='{worker_id}'\
             WHERE id='{job_id}';"
         )
         self.mysql.connection.commit()
