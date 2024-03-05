@@ -45,14 +45,15 @@ class UserRepo(object):
         return None
 
     def read_by_id_safe(self, user_id) -> Optional[User]:
-        cur = self.mysql.connection.cursor()
-        cur.execute(
-            f"SELECT id, username, email, user_type FROM Users WHERE id='{user_id}';"
-        )
-        users = zip_data(cur)
-        if len(users) > 0:
-            return users[0]
-        return None
+        with tracer.start_as_current_span("repo.read_by_id_safe") as child:
+            cur = self.mysql.connection.cursor()
+            cur.execute(
+                f"SELECT id, username, email, user_type FROM Users WHERE id='{user_id}';"
+            )
+            users = zip_data(cur)
+            if len(users) > 0:
+                return users[0]
+            return None
 
     def read_by_username(self, username) -> Optional[User]:
         with tracer.start_as_current_span("repo.read_by_username") as child:

@@ -94,7 +94,6 @@ def login():
 
         token = jwt.encode(
             {
-                # TODO: Maybe add userId
                 "user_id": req.json()["user_id"],
                 "username": username,
                 "user_type": req.json()["user_type"],

@@ -73,19 +73,23 @@ def read_by_id_unsafe():
         return json.dumps({"message": "Invalid user_id"}), 400
     return json.dumps(user), 200
 
-
 @app.route("/users/read-by-id-safe", methods=["GET"])
 def read_by_id_safe():
-    sent_user = request.json
-    try:
-        user_id = sent_user["id"]
-    except Exception as inst:
-        logger.info(inst)
-        return json.dumps({"message": "Please send id"}), 400
-    user: Optional[User] = service.read_by_id_safe(user_id)
-    if user == None:
-        return json.dumps({"message": "Invalid user_id"}), 400
-    return json.dumps(user), 200
+    traceparent = get_header_from_flask_request(request, "traceparent")
+    carrier = {"traceparent": traceparent[0]}
+    ctx = TraceContextTextMapPropagator().extract(carrier)
+    with tracer.start_as_current_span("[GET] /users/read-by-id-safe", context=ctx) as span:
+        sent_user = request.json
+        try:
+            user_id = sent_user["id"]
+        except Exception as inst:
+            logger.info(inst)
+            return json.dumps({"message": "Please send id"}), 400
+        user: Optional[User] = service.read_by_id_safe(user_id)
+        if user == None:
+            return json.dumps({"message": "Invalid user_id"}), 400
+        span.set_status(Status(StatusCode.OK))
+        return json.dumps(user), 200
 
 
 # NOTE: Reads by username in jwt

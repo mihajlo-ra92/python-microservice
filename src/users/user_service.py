@@ -38,10 +38,11 @@ class UserService(object):
         return read_user
 
     def read_by_id_safe(self, user_id: str) -> Optional[User]:
-        read_user = self.repo.read_by_id_safe(user_id)
-        if read_user != None:
-            read_user["password"] = None
-        return read_user
+        with tracer.start_as_current_span("service.read_by_id_safe") as child:
+            read_user = self.repo.read_by_id_safe(user_id)
+            if read_user != None:
+                read_user["password"] = None
+            return read_user
 
     def read_by_username(self, username: str) -> Optional[User]:
         read_user = self.repo.read_by_username(username)

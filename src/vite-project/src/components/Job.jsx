@@ -61,7 +61,9 @@ const Job = () => {
           <Link to={`/job/apply/${jobId}`}>
             <button
               className="apply-button"
-              disabled={!isAuthenticated || userType !== "WORKER"}
+              disabled={
+                !isAuthenticated || userType !== "WORKER" || data.completed
+              }
             >
               Apply to Job
               {isAuthenticated && ["EMPLOYER", "ADMIN"].includes(userType) && (

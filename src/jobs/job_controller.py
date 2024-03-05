@@ -12,6 +12,36 @@ from job_utils import (
     serialize_job,
 )
 
+from opentelemetry.sdk.resources import Resource
+from opentelemetry import trace, metrics
+from opentelemetry.trace.propagation.tracecontext import TraceContextTextMapPropagator
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
+from opentelemetry.trace import Status, StatusCode
+from opentelemetry.sdk.trace.export import (
+    BatchSpanProcessor,
+)
+from opentelemetry.exporter.prometheus import PrometheusMetricReader
+from opentelemetry.sdk.metrics import MeterProvider
+from opentelemetry.sdk.resources import SERVICE_NAME, Resource
+from prometheus_client import start_http_server
+
+resource = Resource(attributes={"service.name": "jobs"})
+trace.set_tracer_provider(TracerProvider(resource=resource))
+tracer = trace.get_tracer("jobs_service")
+otlp_exporter = OTLPSpanExporter(endpoint="http://jaeger:4317", insecure=True)
+span_processor = BatchSpanProcessor(otlp_exporter)
+trace.get_tracer_provider().add_span_processor(span_processor)
+
+start_http_server(port=8000, addr="0.0.0.0")
+reader = PrometheusMetricReader()
+provider = MeterProvider(resource=resource, metric_readers=[reader])
+metrics.set_meter_provider(provider)
+meter = provider.get_meter("jobs-meter")
+job_counter = meter.create_counter(
+    name="job-counter", description="number of job retrivals"
+)
+
 set_logger_config()
 [app, mysql, logger, service] = set_start()
 
@@ -28,10 +58,18 @@ def read_jobs():
 
 @app.route("/jobs/read-open", methods=["GET"])
 def read_open():
-    retVal: Union[Exception, list[Job]] = service.read_open()
-    if isinstance(retVal, Exception):
-        return json.dumps({"message": str(retVal)}), 400
-    return json.dumps(retVal, default=serialize_job), 200
+    with tracer.start_as_current_span("[GET] /jobs/read-open") as span:
+        logger.info("before add1")
+        job_counter.add(1)
+        logger.info("after add1")
+        carrier = {}
+        TraceContextTextMapPropagator().inject(carrier)
+        header = {"traceparent": carrier["traceparent"]}
+        retVal: Union[Exception, list[Job]] = service.read_open(header)
+        if isinstance(retVal, Exception):
+            return json.dumps({"message": str(retVal)}), 400
+        span.set_status(Status(StatusCode.OK))
+        return json.dumps(retVal, default=serialize_job), 200
 
 
 @app.route("/jobs/read-by-id/<uuid:job_id>", methods=["GET"])

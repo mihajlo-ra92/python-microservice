@@ -12,3 +12,6 @@ pip freeze > requirements.txt
 
 Check metrics:
 login_counter_total
+
+Prometheus list all metrics:
+{**name**=~".+"}

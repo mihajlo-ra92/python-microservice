@@ -5,6 +5,20 @@ from flask_mysqldb import MySQL
 
 from job_model import Job
 
+from opentelemetry import trace
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import (
+    BatchSpanProcessor,
+    ConsoleSpanExporter,
+)
+from opentelemetry import trace
+
+provider = TracerProvider()
+processor = BatchSpanProcessor(ConsoleSpanExporter())
+provider.add_span_processor(processor)
+trace.set_tracer_provider(provider)
+tracer = trace.get_tracer("user_tracer")
+
 
 class JobRepo(object):
     def __init__(self, mysql: MySQL, logger: Logger):
@@ -21,9 +35,10 @@ class JobRepo(object):
         return zip_data(cur)
 
     def read_open(self) -> list[Job]:
-        cur = self.mysql.connection.cursor()
-        cur.execute(f"SELECT * FROM Jobs WHERE worker_id IS NULL OR worker_id = ''")
-        return zip_data(cur)
+        with tracer.start_as_current_span("repo.read_open") as child:
+            cur = self.mysql.connection.cursor()
+            cur.execute(f"SELECT * FROM Jobs WHERE worker_id IS NULL OR worker_id = ''")
+            return zip_data(cur)
 
     def read_by_id(self, job_id) -> Optional[Job]:
         cur = self.mysql.connection.cursor()
