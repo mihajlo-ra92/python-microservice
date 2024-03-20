@@ -177,8 +177,9 @@ class JobService(object):
             return self.repo.create(job)
 
     def complete(self, job_id: str) -> Union[Exception, Job]:
-        self.repo.complete(job_id)
-        return self.repo.read_by_id(job_id)
+        with tracer.start_as_current_span("service.complete") as child:
+            self.repo.complete(job_id)
+            return self.repo.read_by_id(job_id)
 
     def assign_worker(self, job_id: str, worker_id: str) -> Union[Exception, Job]:
         with tracer.start_as_current_span("service.assign_worker") as child:

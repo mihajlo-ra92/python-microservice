@@ -85,14 +85,15 @@ class JobRepo(object):
             return job
 
     def complete(self, job_id):
-        cur = self.mysql.connection.cursor()
-        cur.execute(
-            f"UPDATE Jobs\
-            SET completed=1\
-            WHERE id='{job_id}';"
-        )
-        self.mysql.connection.commit()
-        cur.close()
+        with tracer.start_as_current_span("repo.complete") as child:
+            cur = self.mysql.connection.cursor()
+            cur.execute(
+                f"UPDATE Jobs\
+                SET completed=1\
+                WHERE id='{job_id}';"
+            )
+            self.mysql.connection.commit()
+            cur.close()
 
     def assign_worker(self, job_id, worker_id):
         with tracer.start_as_current_span("repo.assign_worker") as child:

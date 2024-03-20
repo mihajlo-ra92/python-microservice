@@ -42,7 +42,11 @@ job_read_open_counter = meter.create_counter(
     name="job-read-open-counter", description="number of open job retrivals"
 )
 job_create_counter = meter.create_counter(
-    name="job-create-counter", description="number of open jobs created"
+    name="job-create-counter", description="number of jobs created"
+)
+
+job_complete_counter = meter.create_counter(
+    name="job-complete-counter", description="number of jobs completed"
 )
 
 set_logger_config()
@@ -124,10 +128,12 @@ def assign_user():
 
 @app.route("/jobs/complete/<uuid:job_id>", methods=["POST"])
 def complete(job_id):
-    retVal: Optional[Job] = service.complete(job_id)
-    if isinstance(retVal, Exception):
-        return json.dumps({"message": str(retVal)})
-    return json.dumps(retVal, default=serialize_job), 200
+    with tracer.start_as_current_span("[POST] /jobs/complete") as span:
+        job_complete_counter.add(1)
+        retVal: Optional[Job] = service.complete(job_id)
+        if isinstance(retVal, Exception):
+            return json.dumps({"message": str(retVal)})
+        return json.dumps(retVal, default=serialize_job), 200
 
 
 @app.route("/jobs/create", methods=["POST"])
