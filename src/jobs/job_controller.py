@@ -38,8 +38,11 @@ reader = PrometheusMetricReader()
 provider = MeterProvider(resource=resource, metric_readers=[reader])
 metrics.set_meter_provider(provider)
 meter = provider.get_meter("jobs-meter")
-job_counter = meter.create_counter(
-    name="job-counter", description="number of job retrivals"
+job_read_open_counter = meter.create_counter(
+    name="job-read-open-counter", description="number of open job retrivals"
+)
+job_create_counter = meter.create_counter(
+    name="job-create-counter", description="number of open jobs created"
 )
 
 set_logger_config()
@@ -60,7 +63,7 @@ def read_jobs():
 def read_open():
     with tracer.start_as_current_span("[GET] /jobs/read-open") as span:
         logger.info("before add1")
-        job_counter.add(1)
+        job_read_open_counter.add(1)
         logger.info("after add1")
         carrier = {}
         TraceContextTextMapPropagator().inject(carrier)
@@ -74,10 +77,14 @@ def read_open():
 
 @app.route("/jobs/read-by-id/<uuid:job_id>", methods=["GET"])
 def read_by_id(job_id):
-    retVal: Optional[Job] = service.read_by_id(job_id)
-    if isinstance(retVal, Exception):
-        return json.dumps({"message": str(retVal)})
-    return json.dumps(retVal, default=serialize_job), 200
+    with tracer.start_as_current_span("[GET] /jobs/read-by-id") as span:
+        carrier = {}
+        TraceContextTextMapPropagator().inject(carrier)
+        header = {"traceparent": carrier["traceparent"]}
+        retVal: Optional[Job] = service.read_by_id(job_id, header)
+        if isinstance(retVal, Exception):
+            return json.dumps({"message": str(retVal)})
+        return json.dumps(retVal, default=serialize_job), 200
 
 
 @app.route("/jobs/read-by-employer-id/<uuid:employer_id>", methods=["GET"])
@@ -116,15 +123,20 @@ def complete(job_id):
 
 @app.route("/jobs/create", methods=["POST"])
 def create_job():
-    try:
-        sent_job: Job = read_job(request.json)
-    except Exception as ex:
-        logger.info(ex)
-        return json.dumps({"message": "Please send all job data"}), 400
-    retVal: Union[Exception, Job] = service.create(sent_job)
-    if isinstance(retVal, Exception):
-        return json.dumps({"message": str(retVal)}), 400
-    return retVal.toJSON(), 201
+    with tracer.start_as_current_span("[POST] /jobs/create") as span:
+        job_create_counter.add(1)
+        carrier = {}
+        TraceContextTextMapPropagator().inject(carrier)
+        header = {"traceparent": carrier["traceparent"]}
+        try:
+            sent_job: Job = read_job(request.json)
+        except Exception as ex:
+            logger.info(ex)
+            return json.dumps({"message": "Please send all job data"}), 400
+        retVal: Union[Exception, Job] = service.create(sent_job, header)
+        if isinstance(retVal, Exception):
+            return json.dumps({"message": str(retVal)}), 400
+        return retVal.toJSON(), 201
 
 
 @app.route("/jobs/update", methods=["PUT"])

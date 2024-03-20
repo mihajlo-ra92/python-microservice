@@ -73,12 +73,18 @@ def read_by_id_unsafe():
         return json.dumps({"message": "Invalid user_id"}), 400
     return json.dumps(user), 200
 
+
 @app.route("/users/read-by-id-safe", methods=["GET"])
 def read_by_id_safe():
-    traceparent = get_header_from_flask_request(request, "traceparent")
-    carrier = {"traceparent": traceparent[0]}
-    ctx = TraceContextTextMapPropagator().extract(carrier)
-    with tracer.start_as_current_span("[GET] /users/read-by-id-safe", context=ctx) as span:
+    traceparent = request.headers.get("traceparent")
+    if traceparent is None:
+        span = tracer.start_span("[GET] /users/read-by-id-safe")
+    else:
+        carrier = {"traceparent": traceparent}
+        ctx = TraceContextTextMapPropagator().extract(carrier)
+        span = tracer.start_span("[GET] /users/read-by-id-safe", context=ctx)
+
+    with span:
         sent_user = request.json
         try:
             user_id = sent_user["id"]

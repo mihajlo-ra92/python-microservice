@@ -14,4 +14,4 @@ Check metrics:
 login_counter_total
 
 Prometheus list all metrics:
-{**name**=~".+"}
+{\_\_name\_\_=~".+"} WITHOUT \

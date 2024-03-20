@@ -78,7 +78,7 @@ class JobService(object):
                     return MyException("Error retriving data from user service")
             return jobs
 
-    def read_by_id(self, job_id: str) -> Union[Exception, Job]:
+    def read_by_id(self, job_id: str, headers) -> Union[Exception, Job]:
         job: Optional[Job] = self.repo.read_by_id(job_id)
         if job is None:
             return MyException("Falied to retrive job")
@@ -86,6 +86,7 @@ class JobService(object):
             reqEmployer = requests.get(
                 "http://users:5000/users/read-by-id-safe",
                 json={"id": job.employer_id},
+                headers=headers,
             )
             self.logger.info(f"recived reqEmployer json: {reqEmployer.json()}")
             job.employer = reqEmployer.json()
@@ -94,6 +95,7 @@ class JobService(object):
                 reqWorker = requests.get(
                     "http://users:5000/users/read-by-id-safe",
                     json={"id": job.worker_id},
+                    headers=headers,
                 )
                 self.logger.info(f"recived reqWorker json: {reqWorker.json()}")
                 job.worker = reqWorker.json()
@@ -158,19 +160,21 @@ class JobService(object):
                 return MyException("Error retriving data from user service")
         return jobs
 
-    def create(self, job: Job) -> Union[Exception, Job]:
-        req = requests.get(
-            "http://users:5000/users/read-by-id-safe", json={"id": job.employer_id}
-        )
-        self.logger.info(f"recived req json: {req.json()}")
-        try:
-            if req.json()["message"] == "Invalid user_id":
-                return MyException("Sent employer_id not valid")
-        except Exception as ex:
-            if req.json()["user_type"] != "EMPLOYER":
-                return MyException("Sent employer_id must be of an employer")
-
-        return self.repo.create(job)
+    def create(self, job: Job, header) -> Union[Exception, Job]:
+        with tracer.start_as_current_span("service.create") as child:
+            req = requests.get(
+                "http://users:5000/users/read-by-id-safe",
+                json={"id": job.employer_id},
+                headers=header,
+            )
+            self.logger.info(f"recived req json: {req.json()}")
+            try:
+                if req.json()["message"] == "Invalid user_id":
+                    return MyException("Sent employer_id not valid")
+            except Exception as ex:
+                if req.json()["user_type"] != "EMPLOYER":
+                    return MyException("Sent employer_id must be of an employer")
+            return self.repo.create(job)
 
     def complete(self, job_id: str) -> Union[Exception, Job]:
         self.repo.complete(job_id)
