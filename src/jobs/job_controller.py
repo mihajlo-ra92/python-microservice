@@ -105,12 +105,21 @@ def finished_read_by_worker_id(worker_id):
 
 @app.route("/jobs/assign-worker", methods=["POST"])
 def assign_user():
-    worker_id = request.json["worker_id"]
-    job_id = request.json["job_id"]
-    retVal: Optional[Job] = service.assign_worker(job_id, worker_id)
-    if isinstance(retVal, Exception):
-        return json.dumps({"message": str(retVal)})
-    return json.dumps(retVal, default=serialize_job), 200
+    traceparent = request.headers.get("traceparent")
+    if traceparent is None:
+        span = tracer.start_span("[POST] /jobs/assign-worker")
+    else:
+        carrier = {"traceparent": traceparent}
+        ctx = TraceContextTextMapPropagator().extract(carrier)
+        span = tracer.start_span("[POST] /jobs/assign-worker", context=ctx)
+
+    with span:
+        worker_id = request.json["worker_id"]
+        job_id = request.json["job_id"]
+        retVal: Optional[Job] = service.assign_worker(job_id, worker_id)
+        if isinstance(retVal, Exception):
+            return json.dumps({"message": str(retVal)})
+        return json.dumps(retVal, default=serialize_job), 200
 
 
 @app.route("/jobs/complete/<uuid:job_id>", methods=["POST"])

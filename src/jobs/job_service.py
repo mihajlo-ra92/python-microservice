@@ -181,10 +181,11 @@ class JobService(object):
         return self.repo.read_by_id(job_id)
 
     def assign_worker(self, job_id: str, worker_id: str) -> Union[Exception, Job]:
-        self.logger.info("service")
-        self.repo.assign_worker(job_id, worker_id)
-        self.logger.info("assigned")
-        return self.repo.read_by_id(job_id)
+        with tracer.start_as_current_span("service.assign_worker") as child:
+            self.logger.info("service")
+            self.repo.assign_worker(job_id, worker_id)
+            self.logger.info("assigned")
+            return self.repo.read_by_id(job_id)
 
     def update(self, job: Job) -> Union[Exception, Job]:
         self.logger.info(f"sent job: {job.toJSON()}")

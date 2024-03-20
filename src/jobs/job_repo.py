@@ -41,12 +41,13 @@ class JobRepo(object):
             return zip_data(cur)
 
     def read_by_id(self, job_id) -> Optional[Job]:
-        cur = self.mysql.connection.cursor()
-        cur.execute(f"SELECT * FROM Jobs WHERE id='{job_id}';")
-        jobs = zip_data(cur)
-        if len(jobs) > 0:
-            return jobs[0]
-        return None
+        with tracer.start_as_current_span("repo.read_by_id") as child:
+            cur = self.mysql.connection.cursor()
+            cur.execute(f"SELECT * FROM Jobs WHERE id='{job_id}';")
+            jobs = zip_data(cur)
+            if len(jobs) > 0:
+                return jobs[0]
+            return None
 
     def read_by_employer_id(self, employer_id) -> list[Job]:
         cur = self.mysql.connection.cursor()
@@ -94,14 +95,15 @@ class JobRepo(object):
         cur.close()
 
     def assign_worker(self, job_id, worker_id):
-        cur = self.mysql.connection.cursor()
-        cur.execute(
-            f"UPDATE Jobs\
-            SET worker_id='{worker_id}'\
-            WHERE id='{job_id}';"
-        )
-        self.mysql.connection.commit()
-        cur.close()
+        with tracer.start_as_current_span("repo.assign_worker") as child:
+            cur = self.mysql.connection.cursor()
+            cur.execute(
+                f"UPDATE Jobs\
+                SET worker_id='{worker_id}'\
+                WHERE id='{job_id}';"
+            )
+            self.mysql.connection.commit()
+            cur.close()
 
     def update(self, job: Job) -> Job:
         cur = self.mysql.connection.cursor()

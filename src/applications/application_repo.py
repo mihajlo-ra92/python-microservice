@@ -28,12 +28,13 @@ class ApplicationRepo(object):
         self.logger = logger
 
     def read_by_id(self, application_id) -> Optional[Application]:
-        cur = self.mysql.connection.cursor()
-        cur.execute(f"SELECT * FROM Applications WHERE id='{application_id}';")
-        applications = self.zip_data(cur)
-        if len(applications) > 0:
-            return applications[0]
-        return None
+        with tracer.start_as_current_span("repo.read_by_id") as child:
+            cur = self.mysql.connection.cursor()
+            cur.execute(f"SELECT * FROM Applications WHERE id='{application_id}';")
+            applications = self.zip_data(cur)
+            if len(applications) > 0:
+                return applications[0]
+            return None
 
     def read_by_worker_id(self, worker_id) -> list[Application]:
         cur = self.mysql.connection.cursor()
@@ -46,43 +47,47 @@ class ApplicationRepo(object):
         return self.zip_data(cur)
 
     def create(self, application: Application) -> Union[Exception, Application]:
-        application.id = str(uuid.uuid1())
-        cur = self.mysql.connection.cursor()
-        try:
-            cur.execute(
-                f"INSERT INTO Applications(id, worker_id, job_id, description) VALUES \
-                ('{application.id}', '{application.worker_id}', '{application.job_id}', '{application.description}');"
-            )
-        except Exception as ex:
-            self.logger.info(ex)
-            return ex
-        self.mysql.connection.commit()
-        cur.close()
-        return application
+        with tracer.start_as_current_span("repo.create") as child:
+            application.id = str(uuid.uuid1())
+            cur = self.mysql.connection.cursor()
+            try:
+                cur.execute(
+                    f"INSERT INTO Applications(id, worker_id, job_id, description) VALUES \
+                    ('{application.id}', '{application.worker_id}', '{application.job_id}', '{application.description}');"
+                )
+            except Exception as ex:
+                self.logger.info(ex)
+                return ex
+            self.mysql.connection.commit()
+            cur.close()
+            return application
 
     def reject_by_id(self, application_id):
-        cur = self.mysql.connection.cursor()
-        cur.execute(
-            f"UPDATE Applications SET status = 'REJECTED' WHERE id='{application_id}';"
-        )
-        self.mysql.connection.commit()
-        cur.close()
+        with tracer.start_as_current_span("repo.reject_by_id") as child:
+            cur = self.mysql.connection.cursor()
+            cur.execute(
+                f"UPDATE Applications SET status = 'REJECTED' WHERE id='{application_id}';"
+            )
+            self.mysql.connection.commit()
+            cur.close()
 
     def approve_by_id(self, application_id):
-        cur = self.mysql.connection.cursor()
-        cur.execute(
-            f"UPDATE Applications SET status = 'APPROVED' WHERE id='{application_id}';"
-        )
-        self.mysql.connection.commit()
-        cur.close()
+        with tracer.start_as_current_span("repo.approve_by_id") as child:
+            cur = self.mysql.connection.cursor()
+            cur.execute(
+                f"UPDATE Applications SET status = 'APPROVED' WHERE id='{application_id}';"
+            )
+            self.mysql.connection.commit()
+            cur.close()
 
     def reject_others(self, application_id, job_id):
-        cur = self.mysql.connection.cursor()
-        cur.execute(
-            f"UPDATE Applications SET status = 'REJECTED' WHERE id !='{application_id}' AND job_id='{job_id}';"
-        )
-        self.mysql.connection.commit()
-        cur.close()
+        with tracer.start_as_current_span("repo.reject_others") as span:
+            cur = self.mysql.connection.cursor()
+            cur.execute(
+                f"UPDATE Applications SET status = 'REJECTED' WHERE id !='{application_id}' AND job_id='{job_id}';"
+            )
+            self.mysql.connection.commit()
+            cur.close()
 
     def delete_by_id(self, application_id: str) -> bool:
         cur = self.mysql.connection.cursor()
